@@ -14,7 +14,7 @@ public:
 	Motor* shooter_motor[SHOOTER_MOTOR_NUM]{};
 	Motor* supply_motor[SUPPLY_MOTOR_NUM]{};
 	
-	enum MODE { ROTATION, RESET, SEPARATE, FOLLOW, LOCK, TEST, AUTO } mode;
+	enum MODE { RESET, ROTATION, SEPARATE, FOLLOW, LOCK, TEST, AUTO } mode;
 	struct CHASSIS
 	{
 

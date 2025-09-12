@@ -96,8 +96,9 @@ void RC::OnRC()
 	if (ctrl.mode != CONTROL::RESET)
 	{
 
-		ctrl.chassis.speedx = rc.ch[0] * para.max_speed / 660.f;
-		ctrl.chassis.speedy = rc.ch[1] * para.max_speed / 660.f;
+		ctrl.chassis.speedx = rc.ch[1] * para.max_speed / 660.f;
+		ctrl.chassis.speedy = rc.ch[0] * para.max_speed / 660.f;
+		ctrl.chassis.speedz = rc.ch[2] * para.max_speed / 660.f;
 		ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, rc.ch[3] * para.pitch_speed / 660.f);
 		if (ctrl.mode == CONTROL::ROTATION)
 		{
