@@ -28,13 +28,12 @@
 #include "Power_read.h"
 
 Motor can1_motor[CAN1_MOTOR_NUM] = {
-	Motor(M3508,SPD, chassis, ID1, PID(2.3f, 0.f, 6.49e-4f, 1.08f, 0.92f)),
-	Motor(M3508,SPD, chassis, ID4, PID(2.3f, 0.f, 6.49e-4f, 1.08f, 0.92f)),
-	Motor(M3508,SPD, chassis, ID2, PID(2.3f, 0.f, 6.49e-4f, 1.08f, 0.92f)),
-	Motor(M3508,SPD, chassis, ID3, PID(2.3f, 0.f, 6.49e-4f, 1.08f, 0.92f)),//can1[0]~can1[3]底盘电机
+	Motor(M3508,SPD, chassis, ID1, PID(2.3f, 0.f, 6.49e-4f, 0.f)),
+	Motor(M3508,SPD, chassis, ID4, PID(2.3f, 0.f, 6.49e-4f, 0.f)),
+	Motor(M3508,SPD, chassis, ID2, PID(2.3f, 0.f, 6.49e-4f, 0.f)),
+	Motor(M3508,SPD, chassis, ID3, PID(2.3f, 0.f, 6.49e-4f, 0.f)),    //can1[0]~can1[3]底盘电机
 	Motor(M6020,POS, pantile, ID6, PID(128.f, 0.f, 78.f, 0.f), PID(11.f, 0.f, 31.f, 0.25f)
-								, PID(200.f, 0.05f, 160.f,0.f), PID(6.5f, 0.f, 2.4f,0.15f)
-								, PID(150.f, 0.f, 70.f,0.f)
+								, PID(200.f, 0.05f, 160.f,0.f))
 };
 Motor can2_motor[CAN2_MOTOR_NUM] = {
 	Motor(M3508,SPD,chassis, ID1, PID(10.f, 0.0f, 1.5f,0.f)),
