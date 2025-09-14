@@ -26,8 +26,8 @@ void CONTROL::Init(std::vector<Motor*> motor)
 			break;
 		}
 	}
-	pantile_motor[PANTILE::TYPE::PITCH]->setangle = para.initial_pitch;
-	pantile_motor[PANTILE::TYPE::YAW]->setangle = para.initial_yaw;
+	pantile_motor[PANTILE::TYPE::PITCH]->setangle = para.initial_pitch;  //pitch初始化
+	pantile_motor[PANTILE::TYPE::YAW]->setangle = para.initial_yaw;  //yaw初始化
 }
 
 
@@ -89,10 +89,10 @@ void CONTROL::CHASSIS::Update() // 运动学解算
 		speedz = 0;
 	}
 
-	ctrl.chassis_motor[0]->setspeed = Ramp(speedy + speedx - speedz, ctrl.chassis_motor[0]->setspeed, 8);
-	ctrl.chassis_motor[1]->setspeed = Ramp(-speedy + speedx - speedz, ctrl.chassis_motor[1]->setspeed, 8);
-	ctrl.chassis_motor[2]->setspeed = Ramp(-speedy - speedx - speedz, ctrl.chassis_motor[2]->setspeed, 8);
-	ctrl.chassis_motor[3]->setspeed = Ramp(speedy - speedx - speedz, ctrl.chassis_motor[3]->setspeed, 8);
+	ctrl.chassis_motor[0]->setspeed = Ramp(speedy + speedx - speedz, ctrl.chassis_motor[0]->setspeed, 30);
+	ctrl.chassis_motor[1]->setspeed = Ramp(-speedy + speedx - speedz, ctrl.chassis_motor[1]->setspeed, 30);
+	ctrl.chassis_motor[2]->setspeed = Ramp(-speedy - speedx - speedz, ctrl.chassis_motor[2]->setspeed, 30);
+	ctrl.chassis_motor[3]->setspeed = Ramp(speedy - speedx - speedz, ctrl.chassis_motor[3]->setspeed, 30);
 }
 
 void CONTROL::PANTILE::Update()
@@ -125,7 +125,7 @@ void CONTROL::SHOOTER::Update()
 	{
 		ctrl.shooter_motor[0]->setspeed = 6000;
 		ctrl.shooter_motor[1]->setspeed = -6000;
-		ctrl.supply_motor[0]->setspeed = 2500;
+		ctrl.supply_motor[0]->setspeed = -2500;
 	}
 	else
 	{

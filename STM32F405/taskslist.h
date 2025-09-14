@@ -13,7 +13,7 @@ private:
 
 };
 void start_task(void* pvParameters);
-void CanTransimtTask(void* pvParameters);
+void CanTransmitTask(void* pvParameters);
 void ArmTask(void* pvParameters);
 void DecodeTask(void* pvParameters);
 void MotorUpdateTask(void* pvParameters);

@@ -54,8 +54,8 @@ void start_task(void* pvParameters)
 		(UBaseType_t)MOTOR_TASK_PRIO,
 		(TaskHandle_t*)&MotorTask_Handler);
 
-	xTaskCreate((TaskFunction_t)CanTransimtTask,
-		(const char*)"CanTransimtTask",
+	xTaskCreate((TaskFunction_t)CanTransmitTask,
+		(const char*)"CanTransmitTask",
 		(uint16_t)CANTX_STK_SIZE,
 		(void*)NULL,
 		(UBaseType_t)CANTX_TASK_PRIO,
@@ -91,7 +91,7 @@ void MotorUpdateTask(void* pvParameters)
 }
 }
 
-void CanTransimtTask(void* pvParameters)
+void CanTransmitTask(void* pvParameters)
 {
 	while (true)
 	{
@@ -101,15 +101,15 @@ void CanTransimtTask(void* pvParameters)
 		switch ((timer.counter++) % 3)
 		{
 		case 0:
-				DMmotor[0].DMmotor_transmit(1);
+				DMmotor[0].DMmotor_transmit(1);  //发送达妙电机数据
 			break;
 		case 1:
-			can1.Transmit(0x1ff, can1.temp_data + 8);
-			can2.Transmit(0x1ff, can2.temp_data + 8);
+			can1.Transmit(0x1ff, can1.temp_data + 8); //发送can1的数据
+			can2.Transmit(0x1ff, can2.temp_data + 8); //发送can2的数据
 			break;
 		case 2:
-			can1.Transmit(0x200, can1.temp_data);
-			can2.Transmit(0x200, can2.temp_data);
+			can1.Transmit(0x200, can1.temp_data); //发送can1的数据
+			can2.Transmit(0x200, can2.temp_data); //发送can2的数据
 		default:
 			break;
 		}
@@ -123,9 +123,9 @@ void ControlTask(void* pvParameters)
 {
 	while (true)
 	{
-		ctrl.chassis.Update();
-		//ctrl.pantile.Update();
-		ctrl.shooter.Update();
+		ctrl.chassis.Update(); //底盘电机更新
+		//ctrl.pantile.Update();  //云台电机更新
+		ctrl.shooter.Update();  //摩擦轮电机更新
 		rc.Update();
 		vTaskDelay(5);
 	}
@@ -136,9 +136,9 @@ void DecodeTask(void* pvParameters)
 {
 	while (true)
 	{
-		rc.Decode();
+		rc.Decode(); //遥控器解码
 
-		imu_pantile.Decode();
+		imu_pantile.Decode(); //陀螺仪解码
 	
 		vTaskDelay(5);
 	}
