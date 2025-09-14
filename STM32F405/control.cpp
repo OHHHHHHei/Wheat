@@ -80,7 +80,7 @@ void CONTROL::CHASSIS::Keep_Direction()
 	speedy = s_x * st + s_y * ct;
 }
 
-void CONTROL::CHASSIS::Update() // 运动学解算
+void CONTROL::CHASSIS::Update() //  运动学解算
 {
 	if (ctrl.mode == RESET)
 	{
