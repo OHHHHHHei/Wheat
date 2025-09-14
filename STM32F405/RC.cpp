@@ -63,6 +63,7 @@ void RC::OnRC()
 	}
 	else if (rc.s[0] == DOWN && rc.s[1] == DOWN)
 	{
+		ctrl.mode = CONTROL::FOLLOW;
 		if (abs(rc.ch[0]) > 330)
 		{
 			ctrl.shooter.openRub = true;

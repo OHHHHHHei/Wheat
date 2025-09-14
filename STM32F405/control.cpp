@@ -123,13 +123,15 @@ void CONTROL::SHOOTER::Update()
 	}
 	if (openRub)
 	{
-		ctrl.shooter_motor[0]->setspeed = -speed ;
-		ctrl.shooter_motor[1]->setspeed = speed ;
+		ctrl.shooter_motor[0]->setspeed = 6000;
+		ctrl.shooter_motor[1]->setspeed = -6000;
+		ctrl.supply_motor[0]->setspeed = 2500;
 	}
 	else
 	{
 		ctrl.shooter_motor[0]->setspeed = 0;
 		ctrl.shooter_motor[1]->setspeed = 0;
+		ctrl.supply_motor[0]->setspeed = 0;
 	}
 
 	if (supply_bullet && openRub)
