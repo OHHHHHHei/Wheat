@@ -15,6 +15,8 @@ public:
 	Motor* supply_motor[SUPPLY_MOTOR_NUM]{};
 	
 	enum MODE { RESET, ROTATION, SEPARATE, FOLLOW, LOCK, TEST, AUTO } mode;
+	float total_speed;
+
 	struct CHASSIS
 	{
 
@@ -58,6 +60,7 @@ public:
 	SHOOTER shooter;
 	
 	static int16_t Setrange(const int16_t original, const int16_t range);
+	void manual_chassis(int32_t speedx, int32_t speedy, int32_t speedz);
 	void Control_Pantile(int32_t ch_yaw, int32_t ch_pitch);
 	float GetDelta(float delta);
 	void Init(std::vector<Motor*> motor);
