@@ -80,7 +80,7 @@ void CONTROL::CHASSIS::Keep_Direction() //使得底盘运动方向按照云台正方向修正，小
 	speedy = s_x * st + s_y * ct;
 }
 
-void CONTROL::manual_chassis(int32_t _speedx, int32_t _speedy, int32_t _speedz)
+void CONTROL::manual_chassis(int32_t _speedx, int32_t _speedy, int32_t _speedz)//底盘控制
 {
 	_speedx *= 1;
 	_speedy *= -1;
