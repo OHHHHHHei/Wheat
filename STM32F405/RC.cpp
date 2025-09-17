@@ -48,9 +48,9 @@ void RC::OnRC()
 	{
 		ctrl.mode = CONTROL::RESET;
 	}
-	else if (rc.s[0] == UP && rc.s[1] == MID)
+	else if (rc.s[0] == UP && rc.s[1] == MID)//分离模式
 	{
-		ctrl.mode = CONTROL::SEPARATE;//分离模式
+		ctrl.mode = CONTROL::SEPARATE;
 		ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f);//云台控制
 
 	}
@@ -68,7 +68,7 @@ void RC::OnRC()
 	}
 	else if (rc.s[0] == DOWN && rc.s[1] == DOWN)
 	{
-		ctrl.mode = CONTROL::FOLLOW;
+		//ctrl.mode = CONTROL::FOLLOW;
 		if (abs(rc.ch[0]) > 330)
 		{
 			ctrl.shooter.openRub = true;
@@ -102,17 +102,18 @@ void RC::OnRC()
 	if (ctrl.mode != CONTROL::RESET)
 	{
 		//底盘控制，如果不是reset模式和分离模式都要用到底盘，所以不在上面模式中单独编写
-		if (ctrl.mode != CONTROL::SEPARATE)//分离模式需要修改遥控器通道
+		if (ctrl.mode == CONTROL::SEPARATE)//分离模式需要修改遥控器通道
 		{
-			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, rc.ch[0] * para.max_speed / 660.f, rc.ch[2] * para.max_speed / 660.f);
+			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f); //分离模式我们丢弃Y轴方向控制
 		}
 		else {
-			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f); //分离模式我们丢弃Y轴方向控制
+			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, rc.ch[0] * para.max_speed / 660.f, rc.ch[2] * para.max_speed / 660.f);
 		}
 
 		//ctrl.chassis.speedx = rc.ch[1] * para.max_speed / 660.f;
 		//ctrl.chassis.speedy = rc.ch[0] * para.max_speed / 660.f;
 		//ctrl.chassis.speedz = rc.ch[2] * para.max_speed / 660.f;
+
 		//云台控制
 		ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, rc.ch[3] * para.pitch_speed / 660.f);
 		if (ctrl.mode == CONTROL::ROTATION)

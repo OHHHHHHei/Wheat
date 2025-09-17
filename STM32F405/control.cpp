@@ -39,8 +39,8 @@ void CONTROL::Control_Pantile(int32_t ch_yaw, int32_t ch_pitch)  //云台控制
 	ch_yaw *= (1.f);//方向相反修改这里正负
 	float adjangle = this->pantile.sensitivity * 2; //sensitivity是基础的灵敏度 这里云台的灵敏度乘2会更灵敏。
 
-	ctrl.pantile.mark_pitch -= (float)(adjangle * ch_pitch);
-	ctrl.pantile.mark_yaw -= (float)(adjangle * ch_yaw);
+	ctrl.pantile.mark_pitch -= (float)(adjangle * ch_pitch);//改变pitch目标值
+	ctrl.pantile.mark_yaw -= (float)(adjangle * ch_yaw);//改变yaw目标值
 }
 
 void CONTROL::PANTILE::Keep_Pantile(float angleKeep, PANTILE::TYPE type,IMU frameOfReference)//保持云台固定在绝对位置，小陀螺时使用
@@ -48,7 +48,7 @@ void CONTROL::PANTILE::Keep_Pantile(float angleKeep, PANTILE::TYPE type,IMU fram
 	float delta = 0, adjust = sensitivity;
 	if (type == YAW)//控制YAW方向
 	{
-		delta = degreeToMechanical(ctrl.GetDelta(angleKeep - frameOfReference.GetAngleYaw())); //计算角度误差并且归一化到最短路径
+		delta = degreeToMechanical(ctrl.GetDelta(angleKeep - frameOfReference.GetAngleYaw())); //计算陀螺仪设定角度与现在角度误差并且归一化到最短路径
 		if (delta <= -4096.f)//机械角归一化
 			delta += 8192.f;
 		else if (delta >= 4096.f)

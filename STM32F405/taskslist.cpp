@@ -104,11 +104,11 @@ void CanTransmitTask(void* pvParameters)
 				DMmotor[0].DMmotor_transmit(1);  //发送达妙电机数据
 			break;
 		case 1:
-			can1.Transmit(0x1ff, can1.temp_data + 8); //发送can1的数据
+			can1.Transmit(0x1ff, can1.temp_data + 8); //发送can1的数据 云台
 			can2.Transmit(0x1ff, can2.temp_data + 8); //发送can2的数据
 			break;
 		case 2:
-			can1.Transmit(0x200, can1.temp_data); //发送can1的数据
+			can1.Transmit(0x200, can1.temp_data); //发送can1的数据  底盘
 			can2.Transmit(0x200, can2.temp_data); //发送can2的数据
 		default:
 			break;
@@ -124,7 +124,7 @@ void ControlTask(void* pvParameters)
 	while (true)
 	{
 		ctrl.chassis.Update(); //底盘电机更新
-		//ctrl.pantile.Update();  //云台电机更新
+		ctrl.pantile.Update();  //云台电机更新
 		ctrl.shooter.Update();  //摩擦轮电机更新
 		rc.Update();
 		vTaskDelay(5);
