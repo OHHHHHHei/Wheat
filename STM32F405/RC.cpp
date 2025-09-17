@@ -50,7 +50,9 @@ void RC::OnRC()
 	}
 	else if (rc.s[0] == UP && rc.s[1] == MID)
 	{
-		
+		ctrl.mode = CONTROL::SEPARATE;//分离模式
+		ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f);//云台控制
+
 	}
 	else if (rc.s[0] == UP && rc.s[1] == UP)//小陀螺模式
 	{
@@ -99,8 +101,14 @@ void RC::OnRC()
 	}
 	if (ctrl.mode != CONTROL::RESET)
 	{
-		//底盘控制
-		ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, rc.ch[0] * para.max_speed / 660.f, rc.ch[2] * para.max_speed / 660.f);
+		//底盘控制，如果不是reset模式和分离模式都要用到底盘，所以不在上面模式中单独编写
+		if (ctrl.mode != CONTROL::SEPARATE)//分离模式需要修改遥控器通道
+		{
+			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, rc.ch[0] * para.max_speed / 660.f, rc.ch[2] * para.max_speed / 660.f);
+		}
+		else {
+			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f); //分离模式我们丢弃Y轴方向控制
+		}
 
 		//ctrl.chassis.speedx = rc.ch[1] * para.max_speed / 660.f;
 		//ctrl.chassis.speedy = rc.ch[0] * para.max_speed / 660.f;
@@ -109,8 +117,8 @@ void RC::OnRC()
 		ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, rc.ch[3] * para.pitch_speed / 660.f);
 		if (ctrl.mode == CONTROL::ROTATION)
 		{
-			ctrl.chassis.speedz = para.rota_speed;
-			ctrl.chassis.Keep_Direction();
+			ctrl.chassis.speedz = para.rota_speed;// 小陀螺转速
+			ctrl.chassis.Keep_Direction(); //保持云台稳定
 		}
 		else if (ctrl.mode == CONTROL::FOLLOW)
 		{
