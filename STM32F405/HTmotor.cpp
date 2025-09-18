@@ -41,7 +41,7 @@ void DMMOTOR::DMmotor_transmit(uint32_t id)
 
 void DMMOTOR::DMmotorinit()
 {
-	CanComm_ControlCmd(can2, CMD_MOTOR_MODE, MOTOR_MODE + 1);
+	CanComm_ControlCmd(can1, CMD_MOTOR_MODE, MOTOR_MODE + 1);//can1和can2意义不明
 	delay.delay_ms(1);
 }
 
@@ -65,7 +65,7 @@ float DMMOTOR::GetTorque()
 	return torque;
 }
 
-void  DMMOTOR::CanComm_ControlCmd(CAN hcan, uint8_t cmd, uint32_t id)//使能帧
+void  DMMOTOR::CanComm_ControlCmd(CAN hcan, uint8_t cmd, uint32_t id)//发送使能帧
 {
 	uint8_t buf[8] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00 };
 	switch (cmd)

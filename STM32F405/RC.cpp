@@ -1,5 +1,6 @@
 #include "label.h"
 #include "RC.h"
+#include "HTmotor.h"
 #include "control.h"
 
 void RC::Decode()
@@ -51,6 +52,7 @@ void RC::OnRC()
 	else if (rc.s[0] == UP && rc.s[1] == MID)//分离模式
 	{
 		ctrl.mode = CONTROL::SEPARATE;
+		//DMmotor[0].CanComm_ControlCmd(can1, CMD_CLEAR_MODE, 1 + MOTOR_MODE);//清除错误
 		ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f);//云台控制
 
 	}
