@@ -28,8 +28,10 @@ void CONTROL::Init(std::vector<Motor*> motor) //初始化
 	}
 	ctrl.mode = SEPARATE; //初始化为分离模式
 
-	pantile_motor[PANTILE::TYPE::PITCH]->setangle = para.initial_pitch;  //pitch初始化
+	//pantile_motor[PANTILE::TYPE::PITCH]->setangle = para.initial_pitch;  //pitch初始化
 	pantile_motor[PANTILE::TYPE::YAW]->setangle = para.initial_yaw;  //yaw初始化
+	DMmotor->setSpeed = 4;
+	DMmotor[0].setPos = para.initial_pitch;//达妙pitch初始化
 }
 
 
@@ -145,7 +147,8 @@ void CONTROL::PANTILE::Update()
 	mark_pitch = std::max(std::min(mark_pitch, para.pitch_max), para.pitch_min);
 
 	ctrl.pantile_motor[PANTILE::YAW]->setangle = mark_yaw;
-	ctrl.pantile_motor[PANTILE::PITCH]->setangle = mark_pitch;
+	//ctrl.pantile_motor[PANTILE::PITCH]->setangle = mark_pitch;
+	DMmotor[0].setPos = mark_pitch;
 }
 
 void CONTROL::SHOOTER::Update()

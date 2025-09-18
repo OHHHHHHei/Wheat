@@ -94,6 +94,7 @@ int main(void)
 			& can1_motor[4],
 			& can1_motor[5]
 	});
+	DMmotor[0].DMmotorinit();
 
 	task.Init();
 	for (;;)

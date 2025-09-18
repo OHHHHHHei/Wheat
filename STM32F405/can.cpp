@@ -119,6 +119,8 @@ HAL_StatusTypeDef CAN::Transmit(const uint32_t ID, const uint8_t* const pData, c
 {
 	hcan.pTxMsg->StdId = ID;					//设置标识符
 	hcan.pTxMsg->IDE = CAN_ID_STD;				//标准帧(无拓展)
+
+
 	hcan.pTxMsg->RTR = CAN_RTR_DATA;			//数据帧
 	hcan.pTxMsg->DLC = len;						//设置长度
 	memcpy(hcan.pTxMsg->Data, pData, len);

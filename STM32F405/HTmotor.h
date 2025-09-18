@@ -12,11 +12,12 @@ constexpr auto MAXROLL = 15;//轮腿ROLL范围限制
 #define INIT_ANGLE_F 3.979350f//3.595378198//180+26 3.665191429
 //#define INIT_ANGLE_B -0.802851442f//-0.48869218//-22° -0.3839724;-0.523598775598//-30°//1.25423324
 #define INIT_ANGLE_B -0.884955f
-#define CMD_MOTOR_MODE      0x01
-#define CMD_RESET_MODE      0x02
-#define CMD_ZERO_POSITION   0x03
-#define CMD_CLEAR_MODE      0x04
-#define MOTOR_MODE			0x100
+//电机使能函数的四个参数
+#define CMD_MOTOR_MODE      0x01//使能
+#define CMD_RESET_MODE      0x02//失能
+#define CMD_ZERO_POSITION   0x03//保存零点
+#define CMD_CLEAR_MODE      0x04//清除错误
+#define MOTOR_MODE			0x100//控制帧的ID偏移，P_S
 #define P_MIN -4*PI    // Radians
 #define P_MAX 4*PI        
 #define V_MIN -10    // Rad/s
