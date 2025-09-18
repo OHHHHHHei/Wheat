@@ -141,6 +141,7 @@ void CONTROL::PANTILE::Update()
 
 	if (mark_yaw > 8192.0)mark_yaw -= 8192.0;//处理环绕，归一化
 	if (mark_yaw < 0.0)mark_yaw += 8192.0;
+
 	//对pitch进行限位
 	mark_pitch = std::max(std::min(mark_pitch, para.pitch_max), para.pitch_min);
 
