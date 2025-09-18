@@ -14,7 +14,8 @@ public:
 	Motor* shooter_motor[SHOOTER_MOTOR_NUM]{};
 	Motor* supply_motor[SUPPLY_MOTOR_NUM]{};
 	
-	enum MODE { RESET, ROTATION, SEPARATE, FOLLOW, LOCK, TEST, AUTO } mode;
+	enum MODE { RESET, ROTATION, SEPARATE, FOLLOW, LOCK, TEST, AUTO };
+	MODE mode[2];
 	float total_speed;
 
 	struct CHASSIS
@@ -33,8 +34,8 @@ public:
 	struct PANTILE
 	{
 		enum TYPE { YAW, PITCH };
-		float mark_pitch{}, mark_yaw{};
-		PID pantile_PID[3] = { {0.04f,0.f,0.f},{0.05f,0.f,0.f}, {0.f,0.f,0.f} };
+		float mark_pitch{}, mark_yaw{}, markImuYaw{}, initialImuYaw{};//各个目标角度
+		PID pantile_PID[3] = { {0.15f,0.f,0.f},{0.05f,0.f,0.f}, {0.f,0.f,0.f} };
 		const float sensitivity = 2.5f;
 		bool aim = false;
 		void Keep_Pantile(float angleKeep, PANTILE::TYPE type, IMU frameOfReference);

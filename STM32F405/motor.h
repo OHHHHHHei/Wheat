@@ -27,7 +27,7 @@ class Motor
 public:
 	uint32_t ID;
 	Kalman kalman{ 1.f,40.f };
-	Motor(const motor_type type, const motor_mode mode, const function_type function, const uint32_t id, PID _speed, PID _position, PID _speed2);
+	Motor(const motor_type type, const motor_mode mode, const function_type function, const uint32_t id, PID _speed, PID _position, PID _speed2);//POSģʽ
 	Motor(const motor_type type, const motor_mode mode, const function_type function, const uint32_t id, PID _speed, PID _position);//ACEģʽ
 	Motor(const motor_type type, const motor_mode mode, const function_type function, const uint32_t id, PID _speed);
 	void recorded_the_Laps();

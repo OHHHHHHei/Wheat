@@ -47,26 +47,25 @@ void RC::OnRC()
 
 	if (rc.s[0] == MID && rc.s[1] == MID)
 	{
-		ctrl.mode = CONTROL::RESET;
+		ctrl.mode[now] = CONTROL::RESET;
 	}
 	else if (rc.s[0] == UP && rc.s[1] == MID)//分离模式
 	{
-		ctrl.mode = CONTROL::SEPARATE;
+		ctrl.mode[now] = CONTROL::SEPARATE;
 		//DMmotor[0].CanComm_ControlCmd(can1, CMD_CLEAR_MODE, 1 + MOTOR_MODE);//清除错误
 		ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f);//云台控制
 
 	}
 	else if (rc.s[0] == UP && rc.s[1] == UP)//小陀螺模式
 	{
-		ctrl.mode = CONTROL::ROTATION;
-		ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f);//控制yaw和pitch，para.yaw_speed是当摇杆推到底时，云台的最大转速，pitch同理
+		ctrl.mode[now] = CONTROL::ROTATION;
 		float RCv_xy = sqrt(pow(rc.ch[1], 2.f) + pow(rc.ch[0], 2.f)) / 660.f;//给小陀螺模式的自旋速度做补偿，计算摇杆距离中心的模长，记录推杆力气不记录方向
 		ctrl.manual_chassis(rc.ch[1] * MAXSPEED / 660, -rc.ch[0] * MAXSPEED / 660, para.rota_speed + RCv_xy);//平移会降低转速，于是提前主动增加一点转速来弥补这个损失
 
 	}
 	else if (rc.s[0] == MID && rc.s[1] == UP)
 	{
-		ctrl.mode = CONTROL::FOLLOW;
+		ctrl.mode[now] = CONTROL::FOLLOW;
 	}
 	else if (rc.s[0] == DOWN && rc.s[1] == DOWN)//单独开火
 	{
@@ -101,10 +100,10 @@ void RC::OnRC()
 	{
 
 	}
-	if (ctrl.mode != CONTROL::RESET)
+	if (ctrl.mode[now] != CONTROL::RESET)
 	{
 		//底盘控制，如果不是reset模式和分离模式都要用到底盘，所以不在上面模式中单独编写
-		if (ctrl.mode == CONTROL::SEPARATE)//分离模式需要修改遥控器通道
+		if (ctrl.mode[now] == CONTROL::SEPARATE)//分离模式需要修改遥控器通道
 		{
 			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f); //分离模式我们丢弃Y轴方向控制
 		}
@@ -117,13 +116,14 @@ void RC::OnRC()
 		//ctrl.chassis.speedz = rc.ch[2] * para.max_speed / 660.f;
 
 		//云台控制
-		ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, rc.ch[3] * para.pitch_speed / 660.f);
-		if (ctrl.mode == CONTROL::ROTATION)
+		ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, rc.ch[3] * para.pitch_speed / 660.f);//控制yaw和pitch，para.yaw_speed是当摇杆推到底时，云台的最大转速，pitch同理
+
+		if (ctrl.mode[now] == CONTROL::ROTATION)
 		{
 			ctrl.chassis.speedz = para.rota_speed;// 小陀螺转速
-			ctrl.chassis.Keep_Direction(); //保持云台稳定
+			ctrl.chassis.Keep_Direction(); //正方向控制
 		}
-		else if (ctrl.mode == CONTROL::FOLLOW)
+		else if (ctrl.mode[now] == CONTROL::FOLLOW)
 		{
 
 		}

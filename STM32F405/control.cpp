@@ -26,9 +26,9 @@ void CONTROL::Init(std::vector<Motor*> motor) //初始化
 			break;
 		}
 	}
-	ctrl.mode = SEPARATE; //初始化为分离模式
+	ctrl.mode[now] = SEPARATE; //初始化为分离模式
 
-	//pantile_motor[PANTILE::TYPE::PITCH]->setangle = para.initial_pitch;  //pitch初始化
+	pantile_motor[PANTILE::TYPE::PITCH]->setangle = para.initial_pitch;  //pitch初始化
 	pantile_motor[PANTILE::TYPE::YAW]->setangle = para.initial_yaw;  //yaw初始化
 	DMmotor->setSpeed = 4;
 	DMmotor[0].setPos = para.initial_pitch;//达妙pitch初始化
@@ -41,8 +41,29 @@ void CONTROL::Control_Pantile(int32_t ch_yaw, int32_t ch_pitch)  //云台控制
 	ch_yaw *= (1.f);//方向相反修改这里正负
 	float adjangle = this->pantile.sensitivity * 2; //sensitivity是基础的灵敏度 这里云台的灵敏度乘2会更灵敏。
 
-	ctrl.pantile.mark_pitch -= (float)(adjangle * ch_pitch);//改变pitch目标值
-	ctrl.pantile.mark_yaw -= (float)(adjangle * ch_yaw);//改变yaw目标值
+
+	//小陀螺的云台控制
+	if (ctrl.mode[now] == CONTROL::ROTATION)
+	{
+		if (ctrl.mode[pre] != CONTROL::ROTATION)
+		{
+			// 如果是，说明这是进入小陀螺模式的第一帧。
+			// 此时，读取IMU的当前绝对角度，并将其设置为目标角度。
+			pantile.markImuYaw = imu_pantile.GetAngleYaw();
+		}
+
+		if (pantile_motor[0]->mode == POS)
+		{
+			pantile.Keep_Pantile(pantile.markImuYaw - ch_yaw, CONTROL::PANTILE::TYPE::YAW, imu_pantile);//保持云台稳定，包含pitch控制
+		}
+	}
+	else {
+		ctrl.pantile.mark_pitch -= (float)(adjangle * ch_pitch);//改变pitch目标值
+		ctrl.pantile.mark_yaw -= (float)(adjangle * ch_yaw);//改变yaw目标值
+	}
+
+	//更新模式数据
+	mode[pre] = mode[now];
 }
 
 void CONTROL::PANTILE::Keep_Pantile(float angleKeep, PANTILE::TYPE type,IMU frameOfReference)//保持云台固定在绝对位置，小陀螺时使用
@@ -114,14 +135,14 @@ void CONTROL::manual_chassis(int32_t _speedx, int32_t _speedy, int32_t _speedz)/
 
 void CONTROL::CHASSIS::Update() 
 {
-	if (ctrl.mode == RESET) //reset状态置零
+	if (ctrl.mode[now] == RESET) //reset状态置零
 	{
 		speedx = 0;
 		speedy = 0;
 		speedz = 0;
 	}
 
-	if (ctrl.mode == ROTATION)
+	if (ctrl.mode[now] == ROTATION)
 	{
 		Keep_Direction();
 	}
@@ -135,7 +156,7 @@ void CONTROL::CHASSIS::Update()
 
 void CONTROL::PANTILE::Update()
 {
-	if (ctrl.mode == RESET)// reset模式初始化yaw和pitch
+	if (ctrl.mode[now] == RESET)// reset模式初始化yaw和pitch
 	{
 		mark_yaw = para.initial_yaw;
 		mark_pitch = para.initial_pitch;
@@ -148,14 +169,14 @@ void CONTROL::PANTILE::Update()
 	mark_pitch = std::max(std::min(mark_pitch, para.pitch_max), para.pitch_min);
 
 	ctrl.pantile_motor[PANTILE::YAW]->setangle = mark_yaw;
-	//ctrl.pantile_motor[PANTILE::PITCH]->setangle = mark_pitch;
+	ctrl.pantile_motor[PANTILE::PITCH]->setangle = mark_pitch;
 	DMmotor[0].setPos = mark_pitch;
 }
 
 void CONTROL::SHOOTER::Update()
 {
 	//now_bullet_speed = judgement.data.ext_shoot_data_t.bullet_speed;
-	if (ctrl.mode == RESET)
+	if (ctrl.mode[now] == RESET)
 	{
 		openRub = false;
 		supply_bullet = false;
