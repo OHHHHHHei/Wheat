@@ -82,28 +82,39 @@ void CONTROL::PANTILE::Keep_Pantile(float angleKeep, PANTILE::TYPE type,IMU fram
 	else if (type==PITCH)// PITCH方向控制，方法同上
 	{
 		delta = degreeToMechanical(ctrl.GetDelta(angleKeep - frameOfReference.GetAnglePitch()));
+
 		if (delta <= -4096.f)
+		{
 			delta += 8192.f;
+		}
 		else if (delta >= 4096.f)
+		{
 			delta -= 8192.f;
+		}
+			
 		if (abs(delta) >= 10.f)
-			mark_pitch += pantile_PID[PANTILE::PITCH].Delta(delta);
+		{
+			mark_pitch += pantile_PID[PANTILE::PITCH].Delta(delta);//增量式PID控制
+		}
 	}
 }
 
 void CONTROL::CHASSIS::Keep_Direction() //使得底盘运动方向按照云台正方向修正，小陀螺时使用
 {
-	double s_x = speedx, s_y = speedy;//保存原始的摇杆输入速度
+	double s_x = speedx, s_y = speedy;//记录原始的摇杆输入速度
+
 	double theat = (-1.f) * ctrl.GetDelta(mechanicalToDegree(ctrl.pantile_motor[PANTILE::TYPE::YAW]->angle[now])// 计算云台相对于底盘的旋转角度theta
 					- mechanicalToDegree(para.initial_yaw)) * PI / 180.f;//initial_yaw是初始化时确定的，就是底盘正前方对应的云台的yaw值，转化为弧度制
+
 	double st = sin(theat);//计算角度的正弦和余弦值
 	double ct = cos(theat);
+
 	//应用二维旋转矩阵公式，speedx 和 speedy 更新为“车体坐标系”下的正确速度
 	speedx = s_x * ct - s_y * st;
 	speedy = s_x * st + s_y * ct;
 }
 
-void CONTROL::manual_chassis(int32_t _speedx, int32_t _speedy, int32_t _speedz)//底盘控制
+void CONTROL::manual_chassis(int32_t _speedx, int32_t _speedy, int32_t _speedz)//底盘控制，输出speedx, y, z,还需要经过运动学解算分配到各个电机
 {
 	_speedx *= 1;
 	_speedy *= -1;
@@ -163,6 +174,7 @@ void CONTROL::PANTILE::Update()
 	//对pitch进行限位
 	mark_pitch = std::max(std::min(mark_pitch, para.pitch_max), para.pitch_min);
 
+	//输出给电机YAW和PITCH
 	ctrl.pantile_motor[PANTILE::YAW]->setangle = mark_yaw;
 	ctrl.pantile_motor[PANTILE::PITCH]->setangle = mark_pitch;
 	DMmotor[0].setPos = mark_pitch;
@@ -181,7 +193,7 @@ void CONTROL::SHOOTER::Update()
 	{
 		ctrl.shooter_motor[0]->setspeed = 6000;
 		ctrl.shooter_motor[1]->setspeed = -6000;
-		ctrl.supply_motor[0]->setspeed = -2500;
+		ctrl.supply_motor[0]->setspeed = -2500;//供弹
 	}
 	else
 	{
@@ -241,7 +253,7 @@ float CONTROL::GetDelta(float delta) //计算角度最短路径
 	return delta;
 }
 
-int16_t CONTROL::Setrange(const int16_t original, const int16_t range)
+int16_t CONTROL::Setrange(const int16_t original, const int16_t range)//限幅函数
 {
 	return fmaxf(fminf(range, original), -range);
 }

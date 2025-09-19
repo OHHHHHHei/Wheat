@@ -35,7 +35,7 @@ public:
 	{
 		enum TYPE { YAW, PITCH };
 		float mark_pitch{}, mark_yaw{}, markImuYaw{}, initialImuYaw{};//各个目标角度
-		PID pantile_PID[3] = { {0.15f,0.f,0.f},{0.05f,0.f,0.f}, {0.f,0.f,0.f} };
+		PID pantile_PID[3] = { {0.15f,0.f,0.f},{0.05f,0.f,0.f}, {0.f,0.f,0.f} };//YAW PITCH
 		const float sensitivity = 2.5f;
 		bool aim = false;
 		void Keep_Pantile(float angleKeep, PANTILE::TYPE type, IMU frameOfReference);
