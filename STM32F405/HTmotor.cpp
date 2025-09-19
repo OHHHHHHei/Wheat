@@ -41,7 +41,7 @@ void DMMOTOR::DMmotor_transmit(uint32_t id)
 
 void DMMOTOR::DMmotorinit()
 {
-	CanComm_ControlCmd(can1, CMD_MOTOR_MODE, MOTOR_MODE + 1);//can1和can2意义不明
+	CanComm_ControlCmd(can2, CMD_MOTOR_MODE, MOTOR_MODE + 1);//can1和can2意义不明
 	delay.delay_ms(1);
 }
 

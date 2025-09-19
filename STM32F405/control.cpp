@@ -94,7 +94,7 @@ void CONTROL::PANTILE::Keep_Pantile(float angleKeep, PANTILE::TYPE type,IMU fram
 void CONTROL::CHASSIS::Keep_Direction() //使得底盘运动方向按照云台正方向修正，小陀螺时使用
 {
 	double s_x = speedx, s_y = speedy;//保存原始的摇杆输入速度
-	double theat = ctrl.GetDelta(mechanicalToDegree(ctrl.pantile_motor[PANTILE::TYPE::YAW]->angle[now])// 计算云台相对于底盘的旋转角度theta
+	double theat = (-1.f) * ctrl.GetDelta(mechanicalToDegree(ctrl.pantile_motor[PANTILE::TYPE::YAW]->angle[now])// 计算云台相对于底盘的旋转角度theta
 					- mechanicalToDegree(para.initial_yaw)) * PI / 180.f;//initial_yaw是初始化时确定的，就是底盘正前方对应的云台的yaw值，转化为弧度制
 	double st = sin(theat);//计算角度的正弦和余弦值
 	double ct = cos(theat);
@@ -140,11 +140,6 @@ void CONTROL::CHASSIS::Update()
 		speedx = 0;
 		speedy = 0;
 		speedz = 0;
-	}
-
-	if (ctrl.mode[now] == ROTATION)
-	{
-		Keep_Direction();
 	}
 
 	//运动学解算

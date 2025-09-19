@@ -97,7 +97,7 @@ void IMU::Decode()
 	}
 }
 
-float IMU::GetAngleYaw()
+float IMU::GetAngleYaw()//获取IMU的YAW值
 {
 	return angle.yaw;
 }
@@ -107,7 +107,7 @@ float IMU::getangularvelocitypitch()
 	return angularvelocity.pitch;
 }
 
-float IMU::GetAnglePitch()
+float IMU::GetAnglePitch()//获取IMU的PITCH值
 {
 	return angle.pitch;
 }

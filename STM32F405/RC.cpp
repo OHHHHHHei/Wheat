@@ -59,9 +59,6 @@ void RC::OnRC()
 	else if (rc.s[0] == UP && rc.s[1] == UP)//小陀螺模式
 	{
 		ctrl.mode[now] = CONTROL::ROTATION;
-		float RCv_xy = sqrt(pow(rc.ch[1], 2.f) + pow(rc.ch[0], 2.f)) / 660.f;//给小陀螺模式的自旋速度做补偿，计算摇杆距离中心的模长，记录推杆力气不记录方向
-		ctrl.manual_chassis(rc.ch[1] * MAXSPEED / 660, -rc.ch[0] * MAXSPEED / 660, para.rota_speed + RCv_xy);//平移会降低转速，于是提前主动增加一点转速来弥补这个损失
-
 	}
 	else if (rc.s[0] == MID && rc.s[1] == UP)
 	{
@@ -107,7 +104,14 @@ void RC::OnRC()
 		{
 			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f); //分离模式我们丢弃Y轴方向控制
 		}
-		else {
+		else if(ctrl.mode[now] == CONTROL::ROTATION)
+		{
+			float RCv_xy = sqrt(pow(rc.ch[1], 2.f) + pow(rc.ch[0], 2.f)) / 660.f;//给小陀螺模式的自旋速度做补偿，计算摇杆距离中心的模长，记录推杆力气不记录方向
+			ctrl.manual_chassis(rc.ch[1] * MAXSPEED / 660, -rc.ch[0] * MAXSPEED / 660, para.rota_speed + RCv_xy);//平移会降低转速，于是提前主动增加一点转速来弥补这个损失
+			ctrl.chassis.Keep_Direction();//控制正方向
+		}
+		else
+		{
 			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, rc.ch[0] * para.max_speed / 660.f, rc.ch[2] * para.max_speed / 660.f);
 		}
 
@@ -118,15 +122,6 @@ void RC::OnRC()
 		//云台控制
 		ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, rc.ch[3] * para.pitch_speed / 660.f);//控制yaw和pitch，para.yaw_speed是当摇杆推到底时，云台的最大转速，pitch同理
 
-		if (ctrl.mode[now] == CONTROL::ROTATION)
-		{
-			ctrl.chassis.speedz = para.rota_speed;// 小陀螺转速
-			ctrl.chassis.Keep_Direction(); //正方向控制
-		}
-		else if (ctrl.mode[now] == CONTROL::FOLLOW)
-		{
-
-		}
 	}
 
 
