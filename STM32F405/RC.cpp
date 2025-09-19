@@ -121,7 +121,7 @@ void RC::OnRC()
 		//ctrl.chassis.speedz = rc.ch[2] * para.max_speed / 660.f;
 
 		//云台控制
-		ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, rc.ch[3] * para.pitch_speed / 660.f);//控制yaw和pitch，para.yaw_speed是当摇杆推到底时，云台的最大转速，pitch同理
+		//ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, rc.ch[3] * para.pitch_speed / 660.f);//控制yaw和pitch，para.yaw_speed是当摇杆推到底时，云台的最大转速，pitch同理
 
 	}
 

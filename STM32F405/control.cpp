@@ -35,11 +35,11 @@ void CONTROL::Init(std::vector<Motor*> motor) //初始化
 }
 
 
-void CONTROL::Control_Pantile(int32_t ch_yaw, int32_t ch_pitch)  //云台控制
+void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //云台控制
 {
 	ch_pitch *= (-1.f);
 	ch_yaw *= (1.f);//方向相反修改这里正负
-	float adjangle = this->pantile.sensitivity * 2; //sensitivity是基础的灵敏度 这里云台的灵敏度乘2会更灵敏。
+	float adjangle = this->pantile.sensitivity; //sensitivity是基础的灵敏度。
 
 
 	//小陀螺的云台控制
