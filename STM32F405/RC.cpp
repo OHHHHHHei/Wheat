@@ -64,15 +64,24 @@ void RC::OnRC()
 	}
 	else if (rc.s[0] == DOWN && rc.s[1] == DOWN)//单独开火
 	{
-		//ctrl.mode = CONTROL::FOLLOW;
+		ctrl.mode[now] = CONTROL::FOLLOW;
+		ctrl.shooter.openRub = true;
 		if (abs(rc.ch[0]) > 330)
+		{
+			ctrl.supply_motor[0]->setspeed = -2500;//供弹
+		}
+		else
+		{
+			ctrl.supply_motor[0]->setspeed = 0;
+		}
+		/*if (abs(rc.ch[0]) > 330)
 		{
 			ctrl.shooter.openRub = true;
 		}
 		else
 		{
 			ctrl.shooter.openRub = false;
-		}
+		}*/
 	}
 	else if (rc.s[0] == DOWN && rc.s[1] == UP)
 	{
@@ -110,9 +119,9 @@ void RC::OnRC()
 			ctrl.manual_chassis(rc.ch[1] * MAXSPEED / 660, -rc.ch[0] * MAXSPEED / 660, para.rota_speed + RCv_xy);//平移会降低转速，于是提前主动增加一点转速来弥补这个损失
 			ctrl.chassis.Keep_Direction();//控制正方向
 		}
-		else
+		else 
 		{
-			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, rc.ch[0] * para.max_speed / 660.f, rc.ch[2] * para.max_speed / 660.f);
+			//ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, rc.ch[0] * para.max_speed / 660.f, rc.ch[2] * para.max_speed / 660.f);
 		}
 
 		//底盘控制，现在已经被封装到manual_chassis

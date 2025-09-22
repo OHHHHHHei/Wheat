@@ -39,7 +39,8 @@ void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //云台控制
 {
 	ch_pitch *= (-1.f);
 	ch_yaw *= (1.f);//方向相反修改这里正负
-	float adjangle = this->pantile.sensitivity; //sensitivity是基础的灵敏度。
+	float pitch_adjangle = this->pantile.sensitivity; //sensitivity是基础的灵敏度。
+	float yaw_adjangle = this->pantile.sensitivity * 1000;
 
 
 	//小陀螺的云台控制
@@ -58,8 +59,8 @@ void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //云台控制
 		}
 	}
 	else {
-		ctrl.pantile.mark_pitch -= (float)(adjangle * ch_pitch);//改变pitch目标值
-		ctrl.pantile.mark_yaw -= (float)(adjangle * ch_yaw);//改变yaw目标值
+		ctrl.pantile.mark_pitch -= (float)(pitch_adjangle * ch_pitch);//改变pitch目标值
+		ctrl.pantile.mark_yaw -= (float)(yaw_adjangle * ch_yaw);//改变yaw目标值
 	}
 
 	//更新模式数据
@@ -193,13 +194,11 @@ void CONTROL::SHOOTER::Update()
 	{
 		ctrl.shooter_motor[0]->setspeed = 6000;
 		ctrl.shooter_motor[1]->setspeed = -6000;
-		ctrl.supply_motor[0]->setspeed = -2500;//供弹
 	}
 	else
 	{
 		ctrl.shooter_motor[0]->setspeed = 0;
 		ctrl.shooter_motor[1]->setspeed = 0;
-		ctrl.supply_motor[0]->setspeed = 0;
 	}
 
 	if (supply_bullet && openRub)

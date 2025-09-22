@@ -45,17 +45,17 @@ public:
 //任务优先级
 #define START_TASK_PRIO		1
 //任务堆栈大小	
-#define START_STK_SIZE 		128  
+#define START_STK_SIZE 		128
 //任务句柄
 extern TaskHandle_t StartTask_Handler;
 //任务函数
 
 #define LED_TASK_PRIO		1
-#define LED_STK_SIZE 		128  
+#define LED_STK_SIZE 		128
 extern TaskHandle_t LedTask_Handler;
 
 #define DECODE_TASK_PRIO		3
-#define DECODE_STK_SIZE 		128  
+#define DECODE_STK_SIZE 		128
 extern TaskHandle_t DecodeTask_Handler;
 
 #define RC_TASK_PRIO		3	
