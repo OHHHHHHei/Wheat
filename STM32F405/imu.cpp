@@ -1,5 +1,7 @@
 #include "imu.h"
 #include "label.h"
+#include "xuc.h"
+#include <cmath>
 void IMU::Init(UART* huart, USART_TypeDef* Instance, const uint32_t BaudRate, IMU_TYPE type)
 {
 	huart->Init(Instance, BaudRate).DMARxInit();
@@ -112,18 +114,26 @@ float IMU::GetAnglePitch()//获取IMU的PITCH值
 	return angle.pitch;
 }
 
-float IMU::GetAngleRoll()
+float IMU::GetAngleRoll()//获取IMU的ROLL值
 {
 	return angle.roll;
 }
 
-float* IMU::GetAcceleration()
+float* IMU::GetAcceleration()//没有被调用，用法不明
 {
 	float temp[3]{};
 	temp[0] = acceleration.x;
 	temp[1] = acceleration.y;
 	temp[2] = acceleration.z;
 	return temp;
+}
+
+void IMU::GetQ()//四维数解算
+{
+	xuc.TxNuc_TJ.q_TJ[0] = cos(angle.yaw / 2) * cos(angle.pitch / 2) * cos(angle.roll / 2) + sin(angle.yaw / 2) * sin(angle.pitch / 2) * sin(angle.roll / 2);
+	xuc.TxNuc_TJ.q_TJ[1] = sin(angle.yaw / 2) * cos(angle.pitch / 2) * cos(angle.roll / 2) - cos(angle.yaw / 2) * sin(angle.pitch / 2) * sin(angle.roll / 2);
+	xuc.TxNuc_TJ.q_TJ[2] = cos(angle.yaw / 2) * sin(angle.pitch / 2) * cos(angle.roll / 2) + sin(angle.yaw / 2) * cos(angle.pitch / 2) * sin(angle.roll / 2);
+	xuc.TxNuc_TJ.q_TJ[3] = cos(angle.yaw / 2) * cos(angle.pitch / 2) * sin(angle.roll / 2) - sin(angle.yaw / 2) * sin(angle.pitch / 2) * cos(angle.roll / 2);
 }
 
 bool IMU::Check(uint8_t* pdata, uint8_t len, uint32_t com)

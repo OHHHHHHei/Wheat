@@ -25,14 +25,17 @@ public:
 	float GetAngleRoll();
 	float getangularvelocitypitch();
 	float* GetAcceleration();
+	void GetQ();
 	int16_t getword(uint8_t HighBit, uint8_t LowBits);
 
 	BaseType_t pd_Rx = false;
 	QueueHandle_t* queueHandler = NULL;
-private:
+
 	Angle angle;
 	AngularVelocity angularvelocity;
 	Acceleration acceleration;
+private:
+	
 	uint16_t crc, len;
 	IMU_TYPE type;
 

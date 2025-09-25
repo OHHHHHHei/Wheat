@@ -22,6 +22,20 @@ struct TxPacket
 	uint16_t checksum = 0;
 }__attribute__((packed));
 
+struct TxPacket_TJ
+{
+	uint8_t head[2] = { 'S', 'P' };
+	uint8_t mode_TJ;  // 0: 空闲, 1: 自瞄, 2: 小符, 3: 大符
+	float q_TJ[4];    // wxyz顺序
+	float yaw_TJ;
+	float yaw_vel_TJ;
+	float pitch_TJ;
+	float pitch_vel_TJ;
+	float bullet_speed_TJ;
+	uint16_t bullet_count_TJ;  // 子弹累计发送次数
+	uint16_t crc16_TJ;
+}__attribute__((packed));
+
 struct RxPacket
 {
 	uint8_t header = 0xA5;
@@ -35,8 +49,18 @@ public:
 
 	TxPacket TxNuc;
 	RxPacket RxNuc;
+	TxPacket_TJ TxNuc_TJ;
 
 	float feedforward = 1.2f;
+	//同济
+	uint8_t mode_TJ;  // 0: 空闲, 1: 自瞄, 2: 小符, 3: 大符
+	float yaw_TJ;
+	float yaw_vel_TJ;
+	float yaw_acc_TJ;
+	float pitch_TJ;
+	float pitch_vel_TJ;
+	float pitch_acc_TJ;
+	uint16_t crc16_TJ;
 	//FTY 25/2/16
 	float yaw;
 	float pitch;

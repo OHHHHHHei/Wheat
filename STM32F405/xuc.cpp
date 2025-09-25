@@ -58,6 +58,20 @@ void XUC::Decode()
 		}
 
 	}
+	//同济
+	else if (m_frame[0] == 'S' && m_frame[1] == 'P') 
+	{
+		if (verifyCRC16CheckSum(frame, 29))//如果数据传输未出现错误
+		{
+			xuc.mode_TJ = m_frame[2];
+			xuc.yaw_TJ = u8_to_float(m_frame + 3);
+			xuc.yaw_vel_TJ = u8_to_float(m_frame + 7);
+			xuc.yaw_acc_TJ = u8_to_float(m_frame + 11);
+			xuc.pitch_TJ = u8_to_float(m_frame + 15);
+			xuc.pitch_vel_TJ = u8_to_float(m_frame + 19);
+			xuc.pitch_acc_TJ = u8_to_float(m_frame + 23);
+		}
+	}
 }
 
 void XUC::Encode()
@@ -65,17 +79,31 @@ void XUC::Encode()
 	own_color = judgement.data.robot_status_t.robot_id <= 7 ? RED : BLUE;
 	//TxPacket TxNuc;  // 创建一个数据包实例
 
-	TxNuc.header = 0x5A;
-	TxNuc.detect_color = !own_color;
-	TxNuc.reset_tracker = 0;
-	TxNuc.reserved = 15;
-	TxNuc.roll = imu_pantile.GetAngleRoll();
-	TxNuc.pitch = imu_pantile.GetAnglePitch();
-	TxNuc.yaw = imu_pantile.GetAngleYaw();
-	TxNuc.aim_x = aim_x;
-	TxNuc.aim_y = aim_y;
-	TxNuc.aim_z = aim_z;
-	TxNuc.checksum = 0;  // 初始化校验和为0
+	TxNuc_TJ.head[0] = 'S';
+	TxNuc_TJ.head[1] = 'P';
+	TxNuc_TJ.mode_TJ = 1;  // 0: 空闲, 1: 自瞄, 2: 小符, 3: 大符
+	imu_pantile.GetQ();
+	for (int i = 0; i < 4; i++) {
+		TxNuc_TJ.q_TJ[i];
+	}   // wxyz顺序
+	TxNuc_TJ.yaw_TJ = imu_pantile.angle.yaw;
+	TxNuc_TJ.yaw_vel_TJ = imu_pantile.angularvelocity.yaw;
+	TxNuc_TJ.pitch_TJ = imu_pantile.angle.pitch;
+	TxNuc_TJ.pitch_vel_TJ = imu_pantile.angularvelocity.pitch;
+	TxNuc_TJ.bullet_speed_TJ = 1.f;
+	TxNuc_TJ.bullet_count_TJ = 1.f; // 子弹累计发送次数
+
+	//TxNuc.header = 0x5A;
+	//TxNuc.detect_color = !own_color;
+	//TxNuc.reset_tracker = 0;
+	//TxNuc.reserved = 15;
+	//TxNuc.roll = imu_pantile.GetAngleRoll();
+	//TxNuc.pitch = imu_pantile.GetAnglePitch();
+	//TxNuc.yaw = imu_pantile.GetAngleYaw();
+	//TxNuc.aim_x = aim_x;
+	//TxNuc.aim_y = aim_y;
+	//TxNuc.aim_z = aim_z;
+	//TxNuc.checksum = 0;  // 初始化校验和为0
 
 	// 计算数据包的总大小
 	int packet_size = sizeof(TxNuc);
@@ -90,11 +118,12 @@ void XUC::Encode()
 	m_uart->UARTTransmit(tx_data, packet_size);
 }
 
+//计算CRC函数，pchMessage为数据指针，dwLength为数据长度，wCRC为初始CRC值
 uint16_t XUC::getCRC16CheckSum(const uint8_t* pchMessage, uint32_t dwLength, uint16_t wCRC)
 {
 	uint8_t ch_data;
 
-	if (pchMessage == nullptr) return 0xFFFF;
+	if (pchMessage == nullptr) return 0xFFFF;//若数据指针为空，返回默认CRC值0xFFFF
 	while (dwLength--) {
 		ch_data = *pchMessage++;
 		(wCRC) =
@@ -104,18 +133,20 @@ uint16_t XUC::getCRC16CheckSum(const uint8_t* pchMessage, uint32_t dwLength, uin
 	return wCRC;
 }
 
+//检验CRC函数，验证数据完整性
 uint32_t XUC::verifyCRC16CheckSum(const uint8_t* pchMessage, uint32_t dwLength)
 {
 	uint16_t w_expected = 0;
 
-	if ((pchMessage == nullptr) || (dwLength <= 2)) return false;
+	if ((pchMessage == nullptr) || (dwLength <= 2)) return false;//收到数据为空，或者长度不够
 
-	w_expected = getCRC16CheckSum(pchMessage, dwLength - 2, CRC16_INIT);
+	w_expected = getCRC16CheckSum(pchMessage, dwLength - 2, CRC16_INIT);//dwLength-2，2是为追加CRC预留的长度
 	return (
 		(w_expected & 0xff) == pchMessage[dwLength - 2] &&
 		((w_expected >> 8) & 0xff) == pchMessage[dwLength - 1]);
 }
 
+//追加CRC函数，将CRC16校验值计算并追加到数据包的末尾，形成完整的数据帧
 void XUC::appendCRC16CheckSum(uint8_t* pchMessage, uint32_t dwLength)
 {
 	uint16_t w_crc = 0;
@@ -124,6 +155,7 @@ void XUC::appendCRC16CheckSum(uint8_t* pchMessage, uint32_t dwLength)
 
 	w_crc = getCRC16CheckSum(reinterpret_cast<uint8_t*>(pchMessage), dwLength - 2, CRC16_INIT);
 
-	pchMessage[dwLength - 2] = (uint8_t)(w_crc & 0x00ff);
-	pchMessage[dwLength - 1] = (uint8_t)((w_crc >> 8) & 0x00ff);
+	//追加CRC值
+	pchMessage[dwLength - 2] = (uint8_t)(w_crc & 0x00ff);//低字节
+	pchMessage[dwLength - 1] = (uint8_t)((w_crc >> 8) & 0x00ff);//高字节
 }
