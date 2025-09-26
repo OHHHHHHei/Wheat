@@ -10,6 +10,7 @@
 #include "delay.h"
 #include "HTmotor.h"
 #include "Power_read.h"
+#include "xuc.h"
 extern float Kp = 10;
 extern float Kd = 0.6;
 extern int start_flag;
@@ -133,6 +134,7 @@ void ControlTask(void* pvParameters)
 		// MODIFIED: 使用vTaskDelayUntil代替vTaskDelay(5)。
 		// 这可以确保此任务严格按照5ms的周期执行，消除了抖动（Jitter），
 		// 这对于PID控制，尤其是D项的稳定计算至关重要。
+		xuc.Encode();
 		vTaskDelayUntil(&xlastWakeTime, xFrequency);
 	}
 }
@@ -147,7 +149,7 @@ void DecodeTask(void* pvParameters)
 	while (true)
 	{
 		rc.Decode(); //遥控器解码
-
+		xuc.Decode();//xuc解码
 		imu_pantile.Decode(); //陀螺仪解码
 	
 		vTaskDelayUntil(&xlastWakeTime, xFrequency);
