@@ -60,7 +60,7 @@ TASK task;
 CONTROL ctrl;
 Judgement judgement;
 PARAMETER para;
-
+XUC xuc;
 
 int main(void)
 {
