@@ -58,7 +58,7 @@ public:
 	int32_t mode{};
 	int round_count;
 	bool pd = 0, spinning = 0;//pd:单次拨弹 spinning:一秒八发
-	PID pid[2];
+	PID pid[3];
 	float Torque_constant_2006 = (0.18*10)/10000;
 	float setangle{}, angle[2]{},distance{}, initial_x{}, rota_angle{}, reset_rota_angle{}, delta_angle{};
 	float Torque_left;

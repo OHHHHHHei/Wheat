@@ -144,7 +144,7 @@ void Motor::Ontimer(uint8_t idata[][8], uint8_t* odata)//idate: receive;odate: t
 		setspeed = pid[position].Position(kalman.Filter(getdeltaa(setangle - angle[now])), 500);//500是PID最大限幅，这是角度环
 		setspeed = setrange(setspeed, maxspeed);//最大速度限幅
 		filtered_speed = speedKalman.Filter(curspeed);
-		current = pid[speed].Position(setspeed - filtered_speed, 500);//这是速度环
+		current = pid[speed].Position(setspeed - curspeed, 500);//这是速度环
 		current = currentKalman.Filter(current);//卡尔曼滤波
 		current = setrange(current, maxcurrent);//最大电流限幅
 	}
