@@ -121,38 +121,26 @@ void CanTransmitTask(void* pvParameters)
 
 void ControlTask(void* pvParameters)
 {
-	// MODIFIED: 为了实现固定的控制周期，使用vTaskDelayUntil
-	TickType_t xlastWakeTime;
-	const TickType_t xFrequency = pdMS_TO_TICKS(5); // 设定5ms的固定周期 (200Hz)
-	xlastWakeTime = xTaskGetTickCount(); // 在循环外初始化xlastWakeTime
 	while (true)
 	{
-		ctrl.chassis.Update(); //底盘电机更新
-		ctrl.pantile.Update();  //云台电机更新
-		ctrl.shooter.Update();  //摩擦轮电机更新
+		ctrl.chassis.Update();
+		ctrl.pantile.Update();
+		ctrl.shooter.Update();
 		rc.Update();
-		// MODIFIED: 使用vTaskDelayUntil代替vTaskDelay(5)。
-		// 这可以确保此任务严格按照5ms的周期执行，消除了抖动（Jitter），
-		// 这对于PID控制，尤其是D项的稳定计算至关重要。
-		xuc.Encode();
-		vTaskDelayUntil(&xlastWakeTime, xFrequency);
+		vTaskDelay(5);
 	}
 }
 
 
 void DecodeTask(void* pvParameters)
 {
-	// MODIFIED: 同样地，为解码任务也使用vTaskDelayUntil来确保固定的执行周期
-	TickType_t xlastWakeTime;
-	const TickType_t xFrequency = pdMS_TO_TICKS(5); // 设定5ms的固定周期 (200Hz)
-	xlastWakeTime = xTaskGetTickCount(); // 初始化
 	while (true)
 	{
-		rc.Decode(); //遥控器解码
-		xuc.Decode();//xuc解码
-		imu_pantile.Decode(); //陀螺仪解码
-	
-		vTaskDelayUntil(&xlastWakeTime, xFrequency);
+		rc.Decode();
+
+		imu_pantile.Decode();
+
+		vTaskDelay(5);
 	}
 }
 

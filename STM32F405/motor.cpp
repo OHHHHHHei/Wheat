@@ -141,10 +141,10 @@ void Motor::Ontimer(uint8_t idata[][8], uint8_t* odata)//idate: receive;odate: t
 	}
 	else if (mode == POS)
 	{
-		setspeed = pid[position].Position(getdeltaa(setangle - angle[now]), 500);//500是PID最大限幅，这是角度环
+		setspeed = pid[position].Position(getdeltaa(setangle - angle[now]), 500);//500是PID最大限幅，这是角度环  position 1
 		setspeed = setrange(setspeed, maxspeed);//最大速度限幅
-		filtered_speed = speedKalman.Filter(curspeed);
-		current = pid[speed].Position(setspeed - curspeed, 500);//这是速度环
+		//filtered_speed = speedKalman.Filter(curspeed);
+		current = pid[speed].Position(setspeed - curspeed, 500);//这是速度环  speed  0
 		current = currentKalman.Filter(current);//卡尔曼滤波
 		current = setrange(current, maxcurrent);//最大电流限幅
 	}
@@ -220,7 +220,7 @@ void Motor::getmax(const type_t type)
 		break;
 	case M6020:
 		maxcurrent = 30000;
-		maxspeed = 200;
+		maxspeed = 400;
 		adjspeed = 80;
 		break;
 	case M2006:
