@@ -106,10 +106,10 @@ void XUC::Encode()
 	//TxNuc.checksum = 0;  // 初始化校验和为0
 
 	// 计算数据包的总大小
-	int packet_size = sizeof(TxNuc);
+	int packet_size = sizeof(TxNuc_TJ);
 
 	// 将数据包复制到发送缓冲区
-	memcpy(tx_data, &TxNuc, packet_size);
+	memcpy(tx_data, &TxNuc_TJ, packet_size);
 
 	// 计算并附加 CRC16 校验和
 	appendCRC16CheckSum(tx_data, packet_size);
