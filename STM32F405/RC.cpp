@@ -108,33 +108,39 @@ void RC::OnRC()
 	//具体控制
 	if (ctrl.mode[now] != CONTROL::RESET)
 	{
-		if (ctrl.mode[now] == CONTROL::SEPARATE)//分离模式需要修改遥控器通道
+		switch (ctrl.mode[now])
 		{
-			ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f);//云台控制
-			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f); //分离模式我们丢弃Y轴方向控制
-		}
-		else if(ctrl.mode[now] == CONTROL::ROTATION)//小陀螺模式的具体控制
+		case CONTROL::SEPARATE: // 分离模式
 		{
-			float RCv_xy = sqrt(pow(rc.ch[1], 2.f) + pow(rc.ch[0], 2.f)) / 660.f;//给小陀螺模式的自旋速度做补偿，计算摇杆推出的距离大小，记录推杆力气不记录方向
-			ctrl.manual_chassis(rc.ch[1] * MAXSPEED / 660, -rc.ch[0] * MAXSPEED / 660, para.rota_speed + RCv_xy);//平移会降低转速，于是提前主动增加一点转速来弥补这个损失
-			ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f);//云台控制
-			ctrl.chassis.Keep_Direction();//控制正方向
-		}
-		else 
-		{
-			//ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, rc.ch[0] * para.max_speed / 660.f, rc.ch[2] * para.max_speed / 660.f);
+			ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
+			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f);   // 分离模式我们丢弃Y轴方向控制
+			break;
 		}
 
-		//底盘控制，现在已经被封装到manual_chassis
-		//ctrl.chassis.speedx = rc.ch[1] * para.max_speed / 660.f;
-		//ctrl.chassis.speedy = rc.ch[0] * para.max_speed / 660.f;
-		//ctrl.chassis.speedz = rc.ch[2] * para.max_speed / 660.f;
+		case CONTROL::ROTATION: // 小陀螺模式
+		{
+			// 给小陀螺模式的自旋速度做补偿，计算摇杆推出的距离大小，记录推杆力气不记录方向
+			float RCv_xy = sqrt(pow(rc.ch[1], 2.f) + pow(rc.ch[0], 2.f)) / 660.f;
+			// 平移会降低转速，于是提前主动增加一点转速来弥补这个损失
+			ctrl.manual_chassis(rc.ch[1] * MAXSPEED / 660, -rc.ch[0] * MAXSPEED / 660, para.rota_speed + RCv_xy);
+			ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
+			ctrl.chassis.Keep_Direction(); // 控制正方向
+			break;
+		}
 
-		//云台控制
-		//ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, rc.ch[3] * para.pitch_speed / 660.f);//控制yaw和pitch，para.yaw_speed是当摇杆推到底时，云台的最大转速，pitch同理
+		case CONTROL::FOLLOW: // 底盘跟随云台模式 (可以把被注释掉的逻辑放在这里)
+		{
 
+			break;
+		}
+
+		default:
+		{
+			// 处理其他未指定的模式，或者什么都不做
+			break;
+		}
+		}
 	}
-
 
 
 }
