@@ -4,10 +4,6 @@
 #include "xuc.h"
 #include "arm_math.h"
 
-// 使用现有的PID类
-enum { INTEGRATE = 0, LLAST = 0, LAST = 1, NOW = 2 };
-#define FILTER 2
-
 // 前馈双环云台控制器
 class PID_FeedForward {
 private:

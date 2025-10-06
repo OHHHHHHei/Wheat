@@ -4,9 +4,6 @@
 #include "arm_math.h"
 #include "pid_feedforward.h"
 
-enum { INTEGRATE = 0, LLAST = 0, LAST = 1, NOW = 2 };
-#define FILTER 2
-
 void PID_FeedForward::readMotorState(float yaw_angle, float yaw_speed, float pitch_angle, float pitch_speed) {
     current_yaw_angle = yaw_angle;
     current_yaw_speed = yaw_speed;
