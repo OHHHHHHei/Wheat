@@ -63,13 +63,13 @@ void XUC::Decode()
 	{
 		if (verifyCRC16CheckSum(frame, 29))//如果数据传输未出现错误
 		{
-			xuc.mode_TJ = m_frame[2];
-			xuc.yaw_TJ = u8_to_float(m_frame + 3);
-			xuc.yaw_vel_TJ = u8_to_float(m_frame + 7);
-			xuc.yaw_acc_TJ = u8_to_float(m_frame + 11);
-			xuc.pitch_TJ = u8_to_float(m_frame + 15);
-			xuc.pitch_vel_TJ = u8_to_float(m_frame + 19);
-			xuc.pitch_acc_TJ = u8_to_float(m_frame + 23);
+			RxNuc_TJ.mode_TJ = m_frame[2];
+			RxNuc_TJ.yaw_TJ = u8_to_float(m_frame + 3);
+			RxNuc_TJ.yaw_vel_TJ = u8_to_float(m_frame + 7);
+			RxNuc_TJ.yaw_acc_TJ = u8_to_float(m_frame + 11);
+			RxNuc_TJ.pitch_TJ = u8_to_float(m_frame + 15);
+			RxNuc_TJ.pitch_vel_TJ = u8_to_float(m_frame + 19);
+			RxNuc_TJ.pitch_acc_TJ = u8_to_float(m_frame + 23);
 		}
 	}
 }

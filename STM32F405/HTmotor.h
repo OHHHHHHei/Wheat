@@ -2,7 +2,6 @@
 #include <cinttypes>
 #include <cmath>
 #include <cstring>
-#include <cmath>
 #include"label.h"
 #include "can.h"
 

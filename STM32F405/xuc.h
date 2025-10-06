@@ -41,7 +41,20 @@ struct RxPacket
 	uint8_t header = 0xA5;
 
 	uint16_t checksum = 0;
-};
+}__attribute__((packed));
+
+struct RxPacket_TJ
+{
+	uint8_t head_TJ[2] = { 'S', 'P' };
+	uint8_t mode_TJ;  // 0: 不控制, 1: 控制云台但不开火，2: 控制云台且开火
+	float yaw_TJ;
+	float yaw_vel_TJ;
+	float yaw_acc_TJ;
+	float pitch_TJ;
+	float pitch_vel_TJ;
+	float pitch_acc_TJ;
+	uint16_t crc16_TJ;
+}__attribute__((packed));
 
 class XUC
 {
@@ -50,17 +63,10 @@ public:
 	TxPacket TxNuc;
 	RxPacket RxNuc;
 	TxPacket_TJ TxNuc_TJ;
+	RxPacket_TJ RxNuc_TJ;
 
 	float feedforward = 1.2f;
-	//同济
-	uint8_t mode_TJ;  // 0: 空闲, 1: 自瞄, 2: 小符, 3: 大符
-	float yaw_TJ;
-	float yaw_vel_TJ;
-	float yaw_acc_TJ;
-	float pitch_TJ;
-	float pitch_vel_TJ;
-	float pitch_acc_TJ;
-	uint16_t crc16_TJ;
+	
 	//FTY 25/2/16
 	float yaw;
 	float pitch;
