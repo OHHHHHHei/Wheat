@@ -29,6 +29,7 @@ public:
 
 		void Update();
 		float Ramp(float setval, float curval, uint32_t RampSlope);
+		float Ramp_plus(float setval, float curval, float Increase_Value, float Decrease_Value);
 	};
 
 	struct PANTILE

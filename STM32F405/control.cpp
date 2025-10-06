@@ -155,10 +155,10 @@ void CONTROL::CHASSIS::Update()
 	}
 
 	//运动学解算
-	ctrl.chassis_motor[0]->setspeed = Ramp(speedy + speedx - speedz, ctrl.chassis_motor[0]->setspeed, 30);
-	ctrl.chassis_motor[1]->setspeed = Ramp(-speedy + speedx - speedz, ctrl.chassis_motor[1]->setspeed, 30);
-	ctrl.chassis_motor[2]->setspeed = Ramp(-speedy - speedx - speedz, ctrl.chassis_motor[2]->setspeed, 30);
-	ctrl.chassis_motor[3]->setspeed = Ramp(speedy - speedx - speedz, ctrl.chassis_motor[3]->setspeed, 30);
+	ctrl.chassis_motor[0]->setspeed = Ramp_plus(+speedy + speedx - speedz, ctrl.chassis_motor[0]->setspeed, 25, 80);
+	ctrl.chassis_motor[1]->setspeed = Ramp_plus(-speedy + speedx - speedz, ctrl.chassis_motor[1]->setspeed, 25, 80);
+	ctrl.chassis_motor[2]->setspeed = Ramp_plus(-speedy - speedx - speedz, ctrl.chassis_motor[2]->setspeed, 25, 80);
+	ctrl.chassis_motor[3]->setspeed = Ramp_plus(+speedy - speedx - speedz, ctrl.chassis_motor[3]->setspeed, 25, 80);
 }
 
 void CONTROL::PANTILE::Update()
@@ -233,6 +233,39 @@ float CONTROL::CHASSIS::Ramp(float setval, float curval, uint32_t RampSlope)
 	{
 		curval -= RampSlope;
 		curval = std::max(curval, setval);
+	}
+
+	return curval;
+}
+
+float CONTROL::CHASSIS::Ramp_plus(float setval, float curval, float Increase_Value, float Decrease_Value)
+{
+	if (abs(setval) - abs(curval) >= 0)
+	{
+		if (setval - curval > 0)
+		{
+			curval += Increase_Value;
+			curval = std::min(curval, setval);
+		}
+		else
+		{
+			curval -= Increase_Value;
+			curval = std::max(curval, setval);
+		}
+
+	}
+	else
+	{
+		if (setval - curval > 0)
+		{
+			curval += Decrease_Value;
+			curval = std::min(curval, setval);
+		}
+		else
+		{
+			curval -= Decrease_Value;
+			curval = std::max(curval, setval);
+		}
 	}
 
 	return curval;
