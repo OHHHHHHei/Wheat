@@ -128,9 +128,9 @@ void RC::OnRC()
 			break;
 		}
 
-		case CONTROL::FOLLOW: // 底盘跟随云台模式 (可以把被注释掉的逻辑放在这里)
+		case CONTROL::FOLLOW: // 底盘跟随云台模式
 		{
-
+			
 			break;
 		}
 
