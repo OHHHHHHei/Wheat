@@ -2,6 +2,8 @@
 #include "tim.h"
 #include "judgement.h"
 #include "HTmotor.h"
+#include "xuc.h"
+
 void CONTROL::Init(std::vector<Motor*> motor) //初始化
 {
 	int num1{}, num2{}, num3{}, num4{};
@@ -288,6 +290,32 @@ float CONTROL::GetDelta(float delta) //计算角度最短路径
 int16_t CONTROL::Setrange(const int16_t original, const int16_t range)//限幅函数
 {
 	return fmaxf(fminf(range, original), -range);
+}
+
+void CONTROL::Control_AutoAim()//自瞄控制函数
+{
+	// 检查视觉系统是否有目标数据
+	if (xuc.track_flag == true)  // xuc.track_flag表示是否检测到目标
+	{
+		// 读取视觉系统提供的目标信息
+		float target_yaw = xuc.yaw;        // 目标yaw角度
+		float target_pitch = xuc.pitch;    // 目标pitch角度
+		float yaw_diff = xuc.yaw_diff;     // yaw角度差
+		float pitch_diff = xuc.pitch_diff; // pitch角度差
+
+		// 简单的比例控制 - 将角度差转换为云台控制增量
+		float yaw_control_increment = yaw_diff * 0.5f;   // 0.5是比例系数，可调整
+		float pitch_control_increment = pitch_diff * 0.5f;
+
+		// 更新云台目标角度
+		pantile.mark_yaw += yaw_control_increment;
+		pantile.mark_pitch += pitch_control_increment;
+
+		// 简单的限幅处理
+		pantile.mark_yaw = Setrange(static_cast<int16_t>(pantile.mark_yaw), 4096);
+		pantile.mark_pitch = Setrange(static_cast<int16_t>(pantile.mark_pitch), 2000);
+	}
+	// 如果没有检测到目标，保持当前云台位置不变
 }
 
 extern uint8_t Power_stsRx[];

@@ -134,6 +134,11 @@ void RC::OnRC()
 			break;
 		}
 
+		case CONTROL::AUTO:
+		{
+			ctrl.Control_AutoAim();  // 调用自瞄控制函数
+		}
+
 		default:
 		{
 			// 处理其他未指定的模式，或者什么都不做
