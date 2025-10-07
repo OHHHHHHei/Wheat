@@ -127,6 +127,7 @@ void ControlTask(void* pvParameters)
 		ctrl.pantile.Update();
 		ctrl.shooter.Update();
 		rc.Update();
+		xuc.Encode();
 		vTaskDelay(5);
 	}
 }
@@ -137,9 +138,9 @@ void DecodeTask(void* pvParameters)
 	while (true)
 	{
 		rc.Decode();
-
+		
 		imu_pantile.Decode();
-
+		xuc.Decode();
 		vTaskDelay(5);
 	}
 }

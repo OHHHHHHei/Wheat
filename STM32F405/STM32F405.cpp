@@ -74,10 +74,10 @@ int main(void)
 
 	can2.Init(CAN2);
 	timer.Init(BASE, TIM3, 1000).BaseInit();
-	imu_pantile.Init(&uart4, UART4, 115200, CH010);
+	imu_pantile.Init(&uart1, USART1, 115200, CH010);
 	rc.Init(&uart3, USART3, 100000);
-	power.Init(&uart5,UART5,9600);
-	xuc.Init(&uart6, USART6, 460800);
+	power.Init(&uart5,UART5,9600);//10.7.23.00确认u4口正常，5.6.2口异常
+	xuc.Init(&uart4, UART4, 460800);
 	para.Init();
 	ctrl.Init(std::vector<Motor*>{
 		&can2_motor[0],
