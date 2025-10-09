@@ -137,6 +137,7 @@ void RC::OnRC()
 		case CONTROL::AUTO:
 		{
 			ctrl.Control_AutoAim();  // 调用自瞄控制函数
+			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f);   // 丢弃Y轴方向控制
 		}
 
 		default:
