@@ -89,7 +89,7 @@ void RC::OnRC()
 	}
 	else if (rc.s[0] == DOWN && rc.s[1] == MID)
 	{
-
+		ctrl.mode[now] = CONTROL::AUTO;
 	}
 
 	else if (rc.s[0] == MID && rc.s[1] == DOWN)

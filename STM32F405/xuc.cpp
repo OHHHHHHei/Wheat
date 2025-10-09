@@ -5,6 +5,8 @@
 #include "math.h"
 #include "RC.h"
 
+int a = 0;
+
 void XUC::Init(UART* huart, USART_TypeDef* Instance, uint32_t BaudRate)
 {
 	huart->Init(Instance, BaudRate).DMARxInit(nullptr).DMATxInit();
@@ -21,6 +23,7 @@ void XUC::Init(UART* huart, USART_TypeDef* Instance, uint32_t BaudRate)
 
 void XUC::Decode()
 {
+	a = 1;
 	pd_Rx = xQueueReceive((m_uart->UartQueueHandler), m_frame, NULL);
 	if (m_frame[0] == 0xA5)
 	{
@@ -63,13 +66,13 @@ void XUC::Decode()
 	{
 		if (verifyCRC16CheckSum(frame, 29))//如果数据传输未出现错误
 		{
-			RxNuc_TJ.mode_TJ = m_frame[2];
-			RxNuc_TJ.yaw_TJ = u8_to_float(m_frame + 3);
-			RxNuc_TJ.yaw_vel_TJ = u8_to_float(m_frame + 7);
-			RxNuc_TJ.yaw_acc_TJ = u8_to_float(m_frame + 11);
-			RxNuc_TJ.pitch_TJ = u8_to_float(m_frame + 15);
-			RxNuc_TJ.pitch_vel_TJ = u8_to_float(m_frame + 19);
-			RxNuc_TJ.pitch_acc_TJ = u8_to_float(m_frame + 23);
+			RxNuc_TJ.mode_TJ = m_frame[2];//火控
+			RxNuc_TJ.yaw_TJ = u8_to_float(m_frame + 3);//预期角度
+			RxNuc_TJ.yaw_vel_TJ = u8_to_float(m_frame + 7);//yaw速度
+			RxNuc_TJ.yaw_acc_TJ = u8_to_float(m_frame + 11);//yaw加速度
+			RxNuc_TJ.pitch_TJ = u8_to_float(m_frame + 15);//pitch预期角度
+			RxNuc_TJ.pitch_vel_TJ = u8_to_float(m_frame + 19);//pitch速度
+			RxNuc_TJ.pitch_acc_TJ = u8_to_float(m_frame + 23);//pitch加速度
 		}
 	}
 }

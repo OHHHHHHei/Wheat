@@ -295,25 +295,21 @@ int16_t CONTROL::Setrange(const int16_t original, const int16_t range)//限幅函数
 void CONTROL::Control_AutoAim()//自瞄控制函数
 {
 	// 检查视觉系统是否有目标数据
-	if (xuc.track_flag == true)  // xuc.track_flag表示是否检测到目标
+	if (xuc.RxNuc_TJ.mode_TJ != 0)  //表示是否检测到目标
 	{
 		// 读取视觉系统提供的目标信息
-		float target_yaw = xuc.yaw;        // 目标yaw角度
-		float target_pitch = xuc.pitch;    // 目标pitch角度
-		float yaw_diff = xuc.yaw_diff;     // yaw角度差
-		float pitch_diff = xuc.pitch_diff; // pitch角度差
+		float target_yaw = xuc.RxNuc_TJ.yaw_TJ / (2 * PI) * 8192;        // 目标yaw角度
+		float target_pitch = xuc.RxNuc_TJ.pitch_TJ;    // 目标pitch角度
+		//float yaw_diff = xuc.yaw_diff;     // yaw角度差
+		//float pitch_diff = xuc.pitch_diff; // pitch角度差
 
 		// 简单的比例控制 - 将角度差转换为云台控制增量
-		float yaw_control_increment = yaw_diff * 0.5f;   // 0.5是比例系数，可调整
-		float pitch_control_increment = pitch_diff * 0.5f;
+		//float yaw_control_increment = yaw_diff * 0.5f;   // 0.5是比例系数，可调整
+		//float pitch_control_increment = pitch_diff * 0.5f;
 
 		// 更新云台目标角度
-		pantile.mark_yaw += yaw_control_increment;
-		pantile.mark_pitch += pitch_control_increment;
-
-		// 简单的限幅处理
-		pantile.mark_yaw = Setrange(static_cast<int16_t>(pantile.mark_yaw), 4096);
-		pantile.mark_pitch = Setrange(static_cast<int16_t>(pantile.mark_pitch), 2000);
+		pantile.mark_yaw = target_yaw;
+		pantile.mark_pitch = target_pitch;
 	}
 	// 如果没有检测到目标，保持当前云台位置不变
 }
