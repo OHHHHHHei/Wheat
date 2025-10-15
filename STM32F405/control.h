@@ -14,7 +14,7 @@ public:
 	Motor* shooter_motor[SHOOTER_MOTOR_NUM]{};
 	Motor* supply_motor[SUPPLY_MOTOR_NUM]{};
 	
-	enum MODE { RESET, ROTATION, SEPARATE, FOLLOW, LOCK, TEST, AUTO };
+	enum MODE { RESET, ROTATION, SEPARATE, FOLLOW, LOCK, TEST, AUTO, SHOOT };
 	MODE mode[2];
 	float total_speed;
 
@@ -60,6 +60,15 @@ public:
 	CHASSIS chassis;
 	PANTILE pantile;
 	SHOOTER shooter;
+
+	// 自瞄前馈参数
+	struct AUTOAIM_FEEDFORWARD
+	{
+		float yaw_vel_ff = 0.5f;      // yaw速度前馈系数
+		float yaw_acc_ff = 0.1f;      // yaw加速度前馈系数  
+		float pitch_vel_ff = 0.5f;    // pitch速度前馈系数
+		float pitch_acc_ff = 0.1f;    // pitch加速度前馈系数
+	} autoaim_ff;
 	
 	static int16_t Setrange(const int16_t original, const int16_t range);
 	void manual_chassis(int32_t speedx, int32_t speedy, int32_t speedz);

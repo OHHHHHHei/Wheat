@@ -99,7 +99,7 @@ void Motor::Ontimer(uint8_t idata[][8], uint8_t* odata)//idate: receive;odate: t
 	if (mode == ACE)
 	{
 
-		if (spinning)
+		if (spinning)//供弹专用
 		{
 			//1秒8发 36/1减速比 一圈八格
 			current += pid[speed].Delta(setspeed - curspeed);

@@ -58,30 +58,13 @@ void RC::OnRC()
 	{
 		ctrl.mode[now] = CONTROL::ROTATION;
 	}
-	else if (rc.s[0] == MID && rc.s[1] == UP)//底盘跟随云台
+	else if (rc.s[0] == MID && rc.s[1] == UP)//自瞄模式
 	{
-		ctrl.mode[now] = CONTROL::FOLLOW;
+		ctrl.mode[now] = CONTROL::AUTO;
 	}
 	else if (rc.s[0] == DOWN && rc.s[1] == DOWN)//单独开火
 	{
-		ctrl.mode[now] = CONTROL::FOLLOW;
-		ctrl.shooter.openRub = true;
-		if (abs(rc.ch[0]) > 330)
-		{
-			ctrl.supply_motor[0]->setspeed = -2500;//供弹
-		}
-		else
-		{
-			ctrl.supply_motor[0]->setspeed = 0;
-		}
-		/*if (abs(rc.ch[0]) > 330)
-		{
-			ctrl.shooter.openRub = true;
-		}
-		else
-		{
-			ctrl.shooter.openRub = false;
-		}*/
+		ctrl.mode[now] = CONTROL::SHOOT;
 	}
 	else if (rc.s[0] == DOWN && rc.s[1] == UP)
 	{
@@ -89,7 +72,7 @@ void RC::OnRC()
 	}
 	else if (rc.s[0] == DOWN && rc.s[1] == MID)
 	{
-		ctrl.mode[now] = CONTROL::AUTO;
+
 	}
 
 	else if (rc.s[0] == MID && rc.s[1] == DOWN)
@@ -128,9 +111,27 @@ void RC::OnRC()
 			break;
 		}
 
-		case CONTROL::FOLLOW: // 底盘跟随云台模式
+		case CONTROL::SHOOT: // 开火模式
 		{
-			
+			ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
+			ctrl.shooter.openRub = true;//开摩擦轮
+			//开启供弹
+			if (abs(rc.ch[0]) > 330)
+			{
+				ctrl.supply_motor[0]->setspeed = -2500;//供弹
+			}
+			else
+			{
+				ctrl.supply_motor[0]->setspeed = 0;
+			}
+			/*if (abs(rc.ch[0]) > 330)
+			{
+				ctrl.shooter.openRub = true;
+			}
+			else
+			{
+				ctrl.shooter.openRub = false;
+			}*/
 			break;
 		}
 
