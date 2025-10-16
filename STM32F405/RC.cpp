@@ -97,6 +97,9 @@ void RC::OnRC()
 		{
 			ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
 			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f);   // 分离模式我们丢弃Y轴方向控制
+			// 安全关闭射击系统
+			ctrl.shooter.openRub = false;
+			ctrl.supply_motor[0]->setspeed = 0;
 			break;
 		}
 
@@ -108,6 +111,9 @@ void RC::OnRC()
 			ctrl.manual_chassis(rc.ch[1] * MAXSPEED / 660, -rc.ch[0] * MAXSPEED / 660, para.rota_speed + RCv_xy);
 			ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
 			ctrl.chassis.Keep_Direction(); // 控制正方向
+			// 安全关闭射击系统
+			ctrl.shooter.openRub = false;
+			ctrl.supply_motor[0]->setspeed = 0;
 			break;
 		}
 

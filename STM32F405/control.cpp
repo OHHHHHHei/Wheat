@@ -57,7 +57,12 @@ void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //云台控制
 
 		if (pantile_motor[0]->mode == POS)
 		{
-			pantile.Keep_Pantile(pantile.markImuYaw - ch_yaw, CONTROL::PANTILE::TYPE::YAW, imu_pantile);//保持云台稳定，包含pitch控制
+			// YAW轴：根据摇杆输入更新IMU目标角度，使用绝对角度控制（抵消底盘旋转）
+			pantile.markImuYaw -= ch_yaw;
+			pantile.Keep_Pantile(pantile.markImuYaw, CONTROL::PANTILE::TYPE::YAW, imu_pantile);
+
+			// PITCH轴：不受底盘旋转影响，直接使用机械角度控制
+			ctrl.pantile.mark_pitch -= (float)(pitch_adjangle * ch_pitch);
 		}
 	}
 	else {
