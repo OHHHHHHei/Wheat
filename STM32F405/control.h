@@ -41,6 +41,8 @@ public:
 		bool aim = false;
 		void Keep_Pantile(float angleKeep, PANTILE::TYPE type, IMU frameOfReference);
 		void Update();
+		int Imucount;
+		bool imu_err_flag = false;
 	};
 
 	struct SHOOTER

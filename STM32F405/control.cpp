@@ -5,7 +5,8 @@
 #include "xuc.h"
 #include "RC.h"
 
-float check = 0;
+float cmd_pitch;
+float cmd_yaw;
 
 void CONTROL::Init(std::vector<Motor*> motor) //初始化
 {
@@ -63,16 +64,28 @@ void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //云台控制
 			// YAW轴：根据摇杆输入更新IMU目标角度，使用绝对角度控制（抵消底盘旋转）
 			pantile.markImuYaw -= ch_yaw;
 			pantile.Keep_Pantile(pantile.markImuYaw, CONTROL::PANTILE::TYPE::YAW, imu_pantile);
-
 			// PITCH轴：不受底盘旋转影响，直接使用机械角度控制
 			ctrl.pantile.mark_pitch -= (float)(pitch_adjangle * ch_pitch);
 		}
 	}
 	else {
-		ctrl.pantile.mark_pitch -= (float)(pitch_adjangle * ch_pitch);//改变pitch目标值
-		ctrl.pantile.mark_yaw -= (float)(yaw_adjangle * ch_yaw);//改变yaw目标值
-	}
+		//陀螺仪控制
+		if (pantile_motor[0]->mode == POS2)
+		{
+			// YAW轴：根据摇杆输入更新IMU目标角度
+			pantile.markImuYaw = GetDelta(pantile.markImuYaw - ch_yaw * yaw_adjangle);
+		}
+		else if (pantile_motor[0]->mode == POS)//机械角控制
+		{
+			pantile.mark_yaw -= (float)(yaw_adjangle * ch_yaw);
+		}
 
+		//pitch控制
+		pantile.mark_pitch -= (float)(yaw_adjangle * ch_pitch);
+
+		//ctrl.pantile.mark_pitch -= (float)(pitch_adjangle * ch_pitch);//改变pitch目标值
+		//ctrl.pantile.mark_yaw -= (float)(yaw_adjangle * ch_yaw);//改变yaw目标值
+	}
 	//更新模式数据
 	mode[pre] = mode[now];
 }
@@ -173,21 +186,65 @@ void CONTROL::CHASSIS::Update()
 
 void CONTROL::PANTILE::Update()
 {
-	if (ctrl.mode[now] == RESET)// reset模式初始化yaw和pitch
+	//错误处理，陀螺仪断电过久
+	static float last_AngleYaw = 0;
+	static float last_AnglePitch = 0;
+	static float last_AngleRoll = 0;
+	if (last_AngleYaw == imu_pantile.GetAngleYaw() && last_AnglePitch == imu_pantile.GetAnglePitch() && last_AngleRoll == imu_pantile.GetAngleRoll())
 	{
-		mark_yaw = para.initial_yaw;
+		Imucount++;
+		if (Imucount > 6000)
+		{
+			imu_err_flag = true;
+			return;
+		}
+	}
+	else
+	{
+		Imucount = 0;
+		imu_err_flag = false;
+	}
+	last_AngleYaw = imu_pantile.GetAngleYaw();
+	last_AnglePitch = imu_pantile.GetAnglePitch();
+	last_AngleRoll = imu_pantile.GetAngleRoll();
+
+
+	//更新云台电机对应IMU值
+	ctrl.pantile_motor[0]->imuValue = imu_pantile.GetAngleYaw();
+
+	//更新对正时候的陀螺仪角度
+	if (fabs(ctrl.pantile_motor[PANTILE::YAW]->angle[now] - para.initial_yaw) < 5.f)
+	{
+		initialImuYaw = imu_pantile.GetAngleYaw();
+	}
+
+	// reset模式初始化yaw和pitch
+	if (ctrl.mode[now] == RESET)
+	{
+		markImuYaw = initialImuYaw;
 		mark_pitch = para.initial_pitch;
 	}
 
-	if (mark_yaw > 8192.0)mark_yaw -= 8192.0;//处理环绕，归一化
-	if (mark_yaw < 0.0)mark_yaw += 8192.0;
+	//处理环绕，归一化，使用机械角时
+	if (mark_yaw > 8192.0)
+	{
+		mark_yaw -= 8192.0;
+	}
+	if (mark_yaw < 0.0)
+	{
+		mark_yaw += 8192.0;
+	}
 
 	//对pitch进行限位
 	mark_pitch = std::max(std::min(mark_pitch, para.pitch_max), para.pitch_min);
 
 	//输出给电机YAW和PITCH
-	ctrl.pantile_motor[PANTILE::YAW]->setangle = mark_yaw;
+	ctrl.pantile_motor[0]->setImuValue = markImuYaw;
+
+	/*ctrl.pantile_motor[PANTILE::YAW]->setangle = mark_yaw;*/
+
 	ctrl.pantile_motor[PANTILE::PITCH]->setangle = mark_pitch;
+
 	DMmotor[0].setPos = mark_pitch;
 }
 
@@ -316,6 +373,8 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 		// 将弧度制转换为机械角单位（0-8191对应0-360度）
 		float yaw_angle_mech = target_yaw / (2 * PI) * 8192;
 		float pitch_angle_mech = target_pitch / (2 * PI) * 8192;
+		cmd_pitch = target_pitch * 57.3;
+		cmd_yaw = target_yaw * 57.3;
 		// 计算yaw轴前馈补偿
 		float yaw_vel_feedforward = autoaim_ff.yaw_vel_ff * target_yaw_vel / (2 * PI) * 8192;
 		float yaw_acc_feedforward = autoaim_ff.yaw_acc_ff * target_yaw_acc / (2 * PI) * 8192;
@@ -335,16 +394,15 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 		if (xuc.RxNuc_TJ.mode_TJ == 2)
 		{
 			// 视觉系统请求开火
-			shooter.openRub = true;        // 启动摩擦轮
+			shooter.openRub = false;        // 启动摩擦轮
 			shooter.supply_bullet = true;  // 启动供弹
 			shooter.auto_shoot = true;     // 自动射击模式
-			supply_motor[0]->setspeed = -2500;   // 供弹
-			check = 1;
+			//supply_motor[0]->setspeed = -2500;   // 供弹
 		}
 		else if (xuc.RxNuc_TJ.mode_TJ == 1)
 		{
 			// 只控制云台，不开火但保持摩擦轮运转（快速响应）
-			shooter.openRub = true;        // 保持摩擦轮运转
+			shooter.openRub = false;        // 保持摩擦轮运转
 			shooter.supply_bullet = false; // 停止供弹
 			shooter.auto_shoot = false;    // 关闭自动射击
 			supply_motor[0]->setspeed = 0;   // 供弹停止
