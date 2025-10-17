@@ -45,9 +45,9 @@ void RC::Decode()
 void RC::OnRC()
 {
 	//调整各种模式的档位
-	if (rc.s[0] == MID && rc.s[1] == MID)
+	if (rc.s[0] == MID && rc.s[1] == MID)//空挡		中中
 	{
-
+		ctrl.mode[now] = CONTROL::BLANK;
 	}
 	else if (rc.s[0] == UP && rc.s[1] == MID)//分离模式   上中
 	{
@@ -62,17 +62,17 @@ void RC::OnRC()
 	{
 		ctrl.mode[now] = CONTROL::AUTO;
 	}
-	else if (rc.s[0] == DOWN && rc.s[1] == DOWN)//单独开火   下下
+	else if (rc.s[0] == DOWN && rc.s[1] == DOWN)//RESET模式   下下
 	{
-		ctrl.mode[now] = CONTROL::SHOOT;
+		ctrl.mode[now] = CONTROL::RESET;
 	}
 	else if (rc.s[0] == DOWN && rc.s[1] == UP)
 	{
 
 	}
-	else if (rc.s[0] == DOWN && rc.s[1] == MID)  //RESET模式    下中
+	else if (rc.s[0] == DOWN && rc.s[1] == MID)  //单独开火    下中
 	{
-		ctrl.mode[now] = CONTROL::RESET;
+		ctrl.mode[now] = CONTROL::SHOOT;
 	}
 
 	else if (rc.s[0] == MID && rc.s[1] == DOWN)
@@ -85,7 +85,9 @@ void RC::OnRC()
 	}
 	if (Shift_mode())
 	{
-
+		// 安全关闭射击系统
+		ctrl.shooter.openRub = false;
+		ctrl.supply_motor[0]->setspeed = 0;
 	}
 
 	//具体控制
@@ -97,9 +99,6 @@ void RC::OnRC()
 		{
 			ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
 			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f);   // 分离模式我们丢弃Y轴方向控制
-			// 安全关闭射击系统
-			ctrl.shooter.openRub = false;
-			ctrl.supply_motor[0]->setspeed = 0;
 			break;
 		}
 
@@ -111,9 +110,6 @@ void RC::OnRC()
 			ctrl.manual_chassis(rc.ch[1] * MAXSPEED / 660, -rc.ch[0] * MAXSPEED / 660, para.rota_speed + RCv_xy);
 			ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
 			ctrl.chassis.Keep_Direction(); // 控制正方向
-			// 安全关闭射击系统
-			ctrl.shooter.openRub = false;
-			ctrl.supply_motor[0]->setspeed = 0;
 			break;
 		}
 
@@ -144,7 +140,7 @@ void RC::OnRC()
 		case CONTROL::AUTO:
 		{
 			ctrl.Control_AutoAim();  // 调用自瞄控制函数
-			//开启供弹
+			/*//开启供弹，自瞄中手控逻辑存在问题
 			if (abs(rc.ch[2]) > 330)
 			{
 				ctrl.supply_motor[0]->setspeed = -2500;//供弹
@@ -152,7 +148,7 @@ void RC::OnRC()
 			else
 			{
 				ctrl.supply_motor[0]->setspeed = 0;
-			}
+			}*/
 			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f);   // 丢弃Y轴方向控制
 		}
 

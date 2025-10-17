@@ -5,7 +5,7 @@
 #include "xuc.h"
 #include "RC.h"
 
-float check;
+float check = 0;
 
 void CONTROL::Init(std::vector<Motor*> motor) //初始化
 {
@@ -316,7 +316,6 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 		// 将弧度制转换为机械角单位（0-8191对应0-360度）
 		float yaw_angle_mech = target_yaw / (2 * PI) * 8192;
 		float pitch_angle_mech = target_pitch / (2 * PI) * 8192;
-		check = yaw_angle_mech;
 		// 计算yaw轴前馈补偿
 		float yaw_vel_feedforward = autoaim_ff.yaw_vel_ff * target_yaw_vel / (2 * PI) * 8192;
 		float yaw_acc_feedforward = autoaim_ff.yaw_acc_ff * target_yaw_acc / (2 * PI) * 8192;
@@ -326,7 +325,7 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 		float pitch_acc_feedforward = autoaim_ff.pitch_acc_ff * target_pitch_acc / (2 * PI) * 8192;
 
 		//// 更新云台目标角度（目标角度 + 速度前馈 + 加速度前馈）
-		pantile.mark_yaw = yaw_angle_mech;
+		//pantile.mark_yaw = yaw_angle_mech;
 		////+ yaw_vel_feedforward + yaw_acc_feedforward;
 		//pantile.mark_pitch = pitch_angle_mech;
 		//// +pitch_vel_feedforward + pitch_acc_feedforward;
@@ -340,6 +339,7 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 			shooter.supply_bullet = true;  // 启动供弹
 			shooter.auto_shoot = true;     // 自动射击模式
 			supply_motor[0]->setspeed = -2500;   // 供弹
+			check = 1;
 		}
 		else if (xuc.RxNuc_TJ.mode_TJ == 1)
 		{
