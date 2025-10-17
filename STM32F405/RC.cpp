@@ -47,22 +47,22 @@ void RC::OnRC()
 	//调整各种模式的档位
 	if (rc.s[0] == MID && rc.s[1] == MID)
 	{
-		ctrl.mode[now] = CONTROL::RESET;
+
 	}
-	else if (rc.s[0] == UP && rc.s[1] == MID)//分离模式
+	else if (rc.s[0] == UP && rc.s[1] == MID)//分离模式   上中
 	{
 		ctrl.mode[now] = CONTROL::SEPARATE;
 		//DMmotor[0].CanComm_ControlCmd(can1, CMD_CLEAR_MODE, 1 + MOTOR_MODE);//清除错误
 	}
-	else if (rc.s[0] == UP && rc.s[1] == UP)//小陀螺模式
+	else if (rc.s[0] == UP && rc.s[1] == UP)//小陀螺模式    上上
 	{
 		ctrl.mode[now] = CONTROL::ROTATION;
 	}
-	else if (rc.s[0] == MID && rc.s[1] == UP)//自瞄模式
+	else if (rc.s[0] == MID && rc.s[1] == UP)//自瞄模式    中上
 	{
 		ctrl.mode[now] = CONTROL::AUTO;
 	}
-	else if (rc.s[0] == DOWN && rc.s[1] == DOWN)//单独开火
+	else if (rc.s[0] == DOWN && rc.s[1] == DOWN)//单独开火   下下
 	{
 		ctrl.mode[now] = CONTROL::SHOOT;
 	}
@@ -70,9 +70,9 @@ void RC::OnRC()
 	{
 
 	}
-	else if (rc.s[0] == DOWN && rc.s[1] == MID)
+	else if (rc.s[0] == DOWN && rc.s[1] == MID)  //RESET模式    下中
 	{
-
+		ctrl.mode[now] = CONTROL::RESET;
 	}
 
 	else if (rc.s[0] == MID && rc.s[1] == DOWN)
@@ -144,6 +144,15 @@ void RC::OnRC()
 		case CONTROL::AUTO:
 		{
 			ctrl.Control_AutoAim();  // 调用自瞄控制函数
+			//开启供弹
+			if (abs(rc.ch[2]) > 330)
+			{
+				ctrl.supply_motor[0]->setspeed = -2500;//供弹
+			}
+			else
+			{
+				ctrl.supply_motor[0]->setspeed = 0;
+			}
 			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f);   // 丢弃Y轴方向控制
 		}
 
