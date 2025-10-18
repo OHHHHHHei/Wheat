@@ -46,7 +46,7 @@ void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //云台控制
 	ch_pitch *= (-1.f);
 	ch_yaw *= (1.f);//方向相反修改这里正负
 	float pitch_adjangle = this->pantile.sensitivity; //sensitivity是基础的灵敏度。
-	float yaw_adjangle = this->pantile.sensitivity * 1000;
+	float yaw_adjangle = this->pantile.sensitivity * 20;
 
 
 	//小陀螺的云台控制
@@ -81,7 +81,7 @@ void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //云台控制
 		}
 
 		//pitch控制
-		pantile.mark_pitch -= (float)(yaw_adjangle * ch_pitch);
+		pantile.mark_pitch -= (float)(pitch_adjangle * ch_pitch);
 
 		//ctrl.pantile.mark_pitch -= (float)(pitch_adjangle * ch_pitch);//改变pitch目标值
 		//ctrl.pantile.mark_yaw -= (float)(yaw_adjangle * ch_yaw);//改变yaw目标值

@@ -35,8 +35,8 @@ Motor can1_motor[CAN1_MOTOR_NUM] = {
 	Motor(M3508,SPD, chassis, ID3, PID(2.3f, 0.f, 6.49e-4f, 0.f)),    //can1[0]~can1[3]底盘电机
 
 	//陀螺仪控制云台
-	Motor(M6020,POS2, pantile, ID7, PID(128.f, 0.f, 78.f, 0.f), PID(11.f, 0.f, 31.f, 0.25f)
-								, PID(0.f, 0.f, 0.f,0.f))
+	Motor(M6020,POS2, pantile, ID7, PID(500.f, 0.f, 600.f, 0.f), PID(3.f, 0.f, 190.f, 0.25f)
+								, PID(0.f, 0.f, 0.f,0.f))//pid 0 speed 1 posititon
 
 	//机械角控制云台
 	/*Motor(M6020,POS, pantile, ID7, PID(500.f, 0.f, 600.f, 0.f), PID(0.1f, 0.f, 1.4f, 0.25f)
@@ -62,7 +62,7 @@ DELAY delay;
 RC rc;
 POWER power;
 LED led1, led2, led3, led4;
-TASK task;
+TASK task; 
 CONTROL ctrl;
 Judgement judgement;
 PARAMETER para;

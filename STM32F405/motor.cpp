@@ -172,7 +172,7 @@ void Motor::Ontimer(uint8_t idata[][8], uint8_t* odata)//idate: receive;odate: t
 		if (ctrl.mode[now] != 5)
 		{
 			//IMU角度误差
-			error = ctrl.GetDelta(setImuValue - imuValue);
+			error = ctrl.GetDelta(ctrl.pantile.markImuYaw  - imu_pantile.GetAngleYaw());
 		}
 		else {
 			//机械角误差
@@ -189,8 +189,8 @@ void Motor::Ontimer(uint8_t idata[][8], uint8_t* odata)//idate: receive;odate: t
 				//机械角PID
 				setspeed = pid[position].Position(error, 500);
 			} else {
-				//IMU角度PID
-				setspeed = pid[position].Position(error, 2000);
+				//IMU角度环PID
+				setspeed = pid[position].Position(error, 1000);
 			}
 		}
 
@@ -199,14 +199,14 @@ void Motor::Ontimer(uint8_t idata[][8], uint8_t* odata)//idate: receive;odate: t
 		if (ctrl.mode[now] == 5)
 		{
 			setspeed = setrange(setspeed, maxspeed);
-			setcurrent = pid[position].Position(setspeed - curspeed, 2000);
+			current = pid[position].Position(setspeed - curspeed, 2000);
 		}
 		else {
 			//IMU角度速度环
-			setcurrent = pid[speed].Position(setspeed - imuSpeedValue, 600);
+			current = pid[speed].Position(speedKalman.Filter(setspeed - curspeed), 600);
 		}
 		current = currentKalman.Filter(current);//卡尔曼滤波
-		setcurrent = setrange(setcurrent, maxcurrent);
+		current = setrange(current, maxcurrent);
 
 
 
