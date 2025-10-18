@@ -13,9 +13,9 @@ constexpr auto MAXSPEED = 5000;
 
 enum { ID1 = 0x205, ID2, ID3, ID4, ID5, ID6, ID7, ID8 };
 enum { pre = 0, now };
-enum pid_mode { speed = 0, position, speed2 };
+enum pid_mode { speed = 0, position, speed2 , pos2};
 enum motor_type { M3508, M3510, M2310, EC60, M6623, M6020, M2006 };
-enum motor_mode { SPD, POS, ACE ,wheel_left,wheel_right};
+enum motor_mode { SPD, POS, ACE ,wheel_left,wheel_right, POS2};// POS2是陀螺仪版本POS
 enum function_type { chassis, pantile, shooter, supply };
 typedef enum { UNINIT, UNCONNECTED, DISCONNECTED, FINE }motor_status_t;
 #define SQRTF(x) ((x)>0?sqrtf(x):-sqrtf(-x))
@@ -25,6 +25,8 @@ class Motor
 {
 	typedef motor_type type_t;
 public:
+
+	float setImuValue{}, imuValue{}, imuSpeedValue{};
 	uint32_t ID;
 	Kalman kalman{ 1.f,40.f };
 	Motor(const motor_type type, const motor_mode mode, const function_type function, const uint32_t id, PID _speed, PID _position, PID _speed2);//POS模式
@@ -58,7 +60,7 @@ public:
 	int32_t mode{};
 	int round_count;
 	bool pd = 0, spinning = 0;//pd:单次拨弹 spinning:一秒八发
-	PID pid[3];
+	PID pid[4];
 	float Torque_constant_2006 = (0.18*10)/10000;
 	float setangle{}, angle[2]{},distance{}, initial_x{}, rota_angle{}, reset_rota_angle{}, delta_angle{};
 	float Torque_left;

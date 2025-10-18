@@ -2,6 +2,9 @@
 #include "gpio.h"
 #include "HTmotor.h"
 #include "imu.h"
+#include "control.h"
+
+
 #define DEG_TO_RAD 0.017453292f  // π / 180
 Motor::Motor(const motor_type type, const motor_mode mode, const function_type function, const uint32_t id, PID _speed, PID _position, PID _speed2)
 	: ID(id)
@@ -99,7 +102,7 @@ void Motor::Ontimer(uint8_t idata[][8], uint8_t* odata)//idate: receive;odate: t
 	if (mode == ACE)
 	{
 
-		if (spinning)
+		if (spinning)//供弹专用
 		{
 			//1秒8发 36/1减速比 一圈八格
 			current += pid[speed].Delta(setspeed - curspeed);
@@ -161,13 +164,63 @@ void Motor::Ontimer(uint8_t idata[][8], uint8_t* odata)//idate: receive;odate: t
 			current = 0;
 		}
 	}
+	else if (mode == POS2)
+	{
+		static float lastSet;
+		float error;
+
+		if (ctrl.mode[now] != 5)
+		{
+			//IMU角度误差
+			error = ctrl.GetDelta(setImuValue - imuValue);
+		}
+		else {
+			//机械角误差
+			error = getdeltaa(para.initial_yaw - angle[now]);
+		}
+
+		if (std::fabs(error) < 0.02)//死区
+		{
+			setspeed = 0;
+		}
+		else {
+			if (ctrl.mode[now] == 5)
+			{
+				//机械角PID
+				setspeed = pid[position].Position(error, 500);
+			} else {
+				//IMU角度PID
+				setspeed = pid[position].Position(error, 2000);
+			}
+		}
+
+		setspeed = setrange(setspeed, maxspeed);//最大速度限幅;
+		//机械角速度环
+		if (ctrl.mode[now] == 5)
+		{
+			setspeed = setrange(setspeed, maxspeed);
+			setcurrent = pid[position].Position(setspeed - curspeed, 2000);
+		}
+		else {
+			//IMU角度速度环
+			setcurrent = pid[speed].Position(setspeed - imuSpeedValue, 600);
+		}
+		current = currentKalman.Filter(current);//卡尔曼滤波
+		setcurrent = setrange(setcurrent, maxcurrent);
+
+
+
+	}
+
 	recorded_the_Laps();
 	GetDistanceFromMechanicalAngle();
+
 	angle[pre] = angle[now];
 	current = setrange(current, maxcurrent);
 	odata[trainsmit_or_receive_ID * 2] = (current & 0xff00) >> 8;//高八位
 	odata[trainsmit_or_receive_ID * 2 + 1] = current & 0x00ff;
 }
+
 void Motor::recorded_the_Laps() {
 	int16_t delta = angle[now] - angle[pre];
 	// 处理回绕：顺时针

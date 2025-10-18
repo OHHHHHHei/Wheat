@@ -14,7 +14,7 @@ public:
 	Motor* shooter_motor[SHOOTER_MOTOR_NUM]{};
 	Motor* supply_motor[SUPPLY_MOTOR_NUM]{};
 	
-	enum MODE { RESET, ROTATION, SEPARATE, FOLLOW, LOCK, TEST, AUTO };
+	enum MODE { RESET, ROTATION, SEPARATE, FOLLOW, LOCK, TEST, AUTO, SHOOT, BLANK };
 	MODE mode[2];
 	float total_speed;
 
@@ -41,6 +41,8 @@ public:
 		bool aim = false;
 		void Keep_Pantile(float angleKeep, PANTILE::TYPE type, IMU frameOfReference);
 		void Update();
+		int Imucount;
+		bool imu_err_flag = false;
 	};
 
 	struct SHOOTER
@@ -60,10 +62,20 @@ public:
 	CHASSIS chassis;
 	PANTILE pantile;
 	SHOOTER shooter;
+
+	// 自瞄前馈参数
+	struct AUTOAIM_FEEDFORWARD
+	{
+		float yaw_vel_ff = 0.5f;      // yaw速度前馈系数
+		float yaw_acc_ff = 0.1f;      // yaw加速度前馈系数  
+		float pitch_vel_ff = 0.5f;    // pitch速度前馈系数
+		float pitch_acc_ff = 0.1f;    // pitch加速度前馈系数
+	} autoaim_ff;
 	
 	static int16_t Setrange(const int16_t original, const int16_t range);
 	void manual_chassis(int32_t speedx, int32_t speedy, int32_t speedz);
 	void Control_Pantile(float_t ch_yaw, float_t ch_pitch);
+	void Control_AutoAim();  // 自瞄控制函数
 	float GetDelta(float delta);
 	void Init(std::vector<Motor*> motor);
 	void init_dm();

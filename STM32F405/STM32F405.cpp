@@ -34,8 +34,13 @@ Motor can1_motor[CAN1_MOTOR_NUM] = {
 	Motor(M3508,SPD, chassis, ID2, PID(2.3f, 0.f, 6.49e-4f, 0.f)),
 	Motor(M3508,SPD, chassis, ID3, PID(2.3f, 0.f, 6.49e-4f, 0.f)),    //can1[0]~can1[3]底盘电机
 
-	Motor(M6020,POS, pantile, ID7, PID(500.f, 0.f, 600.f, 0.f), PID(0.1f, 0.f, 1.4f, 0.25f)
+	//陀螺仪控制云台
+	Motor(M6020,POS2, pantile, ID7, PID(128.f, 0.f, 78.f, 0.f), PID(11.f, 0.f, 31.f, 0.25f)
 								, PID(0.f, 0.f, 0.f,0.f))
+
+	//机械角控制云台
+	/*Motor(M6020,POS, pantile, ID7, PID(500.f, 0.f, 600.f, 0.f), PID(0.1f, 0.f, 1.4f, 0.25f)
+								, PID(0.f, 0.f, 0.f,0.f))*/
 };
 Motor can2_motor[CAN2_MOTOR_NUM] = {
 	Motor(M3508, SPD, shooter, ID1, PID(7.5f, 0.f, 0.02f,0.f)),
@@ -75,9 +80,9 @@ int main(void)
 	can2.Init(CAN2);
 	timer.Init(BASE, TIM3, 1000).BaseInit();
 	imu_pantile.Init(&uart1, USART1, 115200, CH010);
-	rc.Init(&uart3, USART3, 100000);
+	rc.Init(&uart4, UART4, 100000);
 	power.Init(&uart5,UART5,9600);//10.7.23.00确认u4口正常，5.6.2口异常
-	xuc.Init(&uart4, UART4, 460800);
+	xuc.Init(&uart3, USART3, 460800);
 	para.Init();
 	ctrl.Init(std::vector<Motor*>{
 		&can2_motor[0],

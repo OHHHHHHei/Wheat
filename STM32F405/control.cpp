@@ -1,8 +1,14 @@
-#include "control.h"
+ï»¿#include "control.h"
 #include "tim.h"
 #include "judgement.h"
 #include "HTmotor.h"
-void CONTROL::Init(std::vector<Motor*> motor) //³õÊ¼»¯
+#include "xuc.h"
+#include "RC.h"
+
+float cmd_pitch;
+float cmd_yaw;
+
+void CONTROL::Init(std::vector<Motor*> motor) //åˆå§‹åŒ–
 {
 	int num1{}, num2{}, num3{}, num4{};
 	for (int i = 0; i < motor.size(); i++)
@@ -26,61 +32,78 @@ void CONTROL::Init(std::vector<Motor*> motor) //³õÊ¼»¯
 			break;
 		}
 	}
-	ctrl.mode[now] = SEPARATE; //³õÊ¼»¯Îª·ÖÀëÄ£Ê½
+	ctrl.mode[now] = SEPARATE; //åˆå§‹åŒ–ä¸ºåˆ†ç¦»æ¨¡å¼
 
-	pantile_motor[PANTILE::TYPE::PITCH]->setangle = para.initial_pitch;  //pitch³õÊ¼»¯
-	pantile_motor[PANTILE::TYPE::YAW]->setangle = para.initial_yaw;  //yaw³õÊ¼»¯
+	pantile_motor[PANTILE::TYPE::PITCH]->setangle = para.initial_pitch;  //pitchåˆå§‹åŒ–
+	pantile_motor[PANTILE::TYPE::YAW]->setangle = para.initial_yaw;  //yawåˆå§‹åŒ–
 	DMmotor->setSpeed = 4;
-	DMmotor[0].setPos = para.initial_pitch;//´ïÃîpitch³õÊ¼»¯
+	DMmotor[0].setPos = para.initial_pitch;//è¾¾å¦™pitchåˆå§‹åŒ–
 }
 
 
-void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //ÔÆÌ¨¿ØÖÆ
+void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //äº‘å°æ§åˆ¶
 {
 	ch_pitch *= (-1.f);
-	ch_yaw *= (1.f);//·½ÏòÏà·´ĞŞ¸ÄÕâÀïÕı¸º
-	float pitch_adjangle = this->pantile.sensitivity; //sensitivityÊÇ»ù´¡µÄÁéÃô¶È¡£
+	ch_yaw *= (1.f);//æ–¹å‘ç›¸åä¿®æ”¹è¿™é‡Œæ­£è´Ÿ
+	float pitch_adjangle = this->pantile.sensitivity; //sensitivityæ˜¯åŸºç¡€çš„çµæ•åº¦ã€‚
 	float yaw_adjangle = this->pantile.sensitivity * 1000;
 
 
-	//Ğ¡ÍÓÂİµÄÔÆÌ¨¿ØÖÆ
+	//å°é™€èºçš„äº‘å°æ§åˆ¶
 	if (ctrl.mode[now] == CONTROL::ROTATION)
 	{
 		if (ctrl.mode[pre] != CONTROL::ROTATION)
 		{
-			// Èç¹ûÊÇ£¬ËµÃ÷ÕâÊÇ½øÈëĞ¡ÍÓÂİÄ£Ê½µÄµÚÒ»Ö¡¡£
-			// ´ËÊ±£¬¶ÁÈ¡IMUµÄµ±Ç°¾ø¶Ô½Ç¶È£¬²¢½«ÆäÉèÖÃÎªÄ¿±ê½Ç¶È¡£
+			// å¦‚æœæ˜¯ï¼Œè¯´æ˜è¿™æ˜¯è¿›å…¥å°é™€èºæ¨¡å¼çš„ç¬¬ä¸€å¸§ã€‚
+			// æ­¤æ—¶ï¼Œè¯»å–IMUçš„å½“å‰ç»å¯¹è§’åº¦ï¼Œå¹¶å°†å…¶è®¾ç½®ä¸ºç›®æ ‡è§’åº¦ã€‚
 			pantile.markImuYaw = imu_pantile.GetAngleYaw();
 		}
 
 		if (pantile_motor[0]->mode == POS)
 		{
-			pantile.Keep_Pantile(pantile.markImuYaw - ch_yaw, CONTROL::PANTILE::TYPE::YAW, imu_pantile);//±£³ÖÔÆÌ¨ÎÈ¶¨£¬°üº¬pitch¿ØÖÆ
+			// YAWè½´ï¼šæ ¹æ®æ‘‡æ†è¾“å…¥æ›´æ–°IMUç›®æ ‡è§’åº¦ï¼Œä½¿ç”¨ç»å¯¹è§’åº¦æ§åˆ¶ï¼ˆæŠµæ¶ˆåº•ç›˜æ—‹è½¬ï¼‰
+			pantile.markImuYaw -= ch_yaw;
+			pantile.Keep_Pantile(pantile.markImuYaw, CONTROL::PANTILE::TYPE::YAW, imu_pantile);
+			// PITCHè½´ï¼šä¸å—åº•ç›˜æ—‹è½¬å½±å“ï¼Œç›´æ¥ä½¿ç”¨æœºæ¢°è§’åº¦æ§åˆ¶
+			ctrl.pantile.mark_pitch -= (float)(pitch_adjangle * ch_pitch);
 		}
 	}
 	else {
-		ctrl.pantile.mark_pitch -= (float)(pitch_adjangle * ch_pitch);//¸Ä±äpitchÄ¿±êÖµ
-		ctrl.pantile.mark_yaw -= (float)(yaw_adjangle * ch_yaw);//¸Ä±äyawÄ¿±êÖµ
-	}
+		//é™€èºä»ªæ§åˆ¶
+		if (pantile_motor[0]->mode == POS2)
+		{
+			// YAWè½´ï¼šæ ¹æ®æ‘‡æ†è¾“å…¥æ›´æ–°IMUç›®æ ‡è§’åº¦
+			pantile.markImuYaw = GetDelta(pantile.markImuYaw - ch_yaw * yaw_adjangle);
+		}
+		else if (pantile_motor[0]->mode == POS)//æœºæ¢°è§’æ§åˆ¶
+		{
+			pantile.mark_yaw -= (float)(yaw_adjangle * ch_yaw);
+		}
 
-	//¸üĞÂÄ£Ê½Êı¾İ
+		//pitchæ§åˆ¶
+		pantile.mark_pitch -= (float)(yaw_adjangle * ch_pitch);
+
+		//ctrl.pantile.mark_pitch -= (float)(pitch_adjangle * ch_pitch);//æ”¹å˜pitchç›®æ ‡å€¼
+		//ctrl.pantile.mark_yaw -= (float)(yaw_adjangle * ch_yaw);//æ”¹å˜yawç›®æ ‡å€¼
+	}
+	//æ›´æ–°æ¨¡å¼æ•°æ®
 	mode[pre] = mode[now];
 }
 
-void CONTROL::PANTILE::Keep_Pantile(float angleKeep, PANTILE::TYPE type,IMU frameOfReference)//±£³ÖÔÆÌ¨¹Ì¶¨ÔÚ¾ø¶ÔÎ»ÖÃ£¬Ğ¡ÍÓÂİÊ±Ê¹ÓÃ
+void CONTROL::PANTILE::Keep_Pantile(float angleKeep, PANTILE::TYPE type,IMU frameOfReference)//ä¿æŒäº‘å°å›ºå®šåœ¨ç»å¯¹ä½ç½®ï¼Œå°é™€èºæ—¶ä½¿ç”¨
 {
 	float delta = 0, adjust = sensitivity;
-	if (type == YAW)//¿ØÖÆYAW·½Ïò
+	if (type == YAW)//æ§åˆ¶YAWæ–¹å‘
 	{
-		delta = degreeToMechanical(ctrl.GetDelta(angleKeep - frameOfReference.GetAngleYaw())); //¼ÆËãÍÓÂİÒÇÉè¶¨½Ç¶ÈÓëÏÖÔÚ½Ç¶ÈÎó²î²¢ÇÒ¹éÒ»»¯µ½×î¶ÌÂ·¾¶
-		if (delta <= -4096.f)//»úĞµ½Ç¹éÒ»»¯
+		delta = degreeToMechanical(ctrl.GetDelta(angleKeep - frameOfReference.GetAngleYaw())); //è®¡ç®—é™€èºä»ªè®¾å®šè§’åº¦ä¸ç°åœ¨è§’åº¦è¯¯å·®å¹¶ä¸”å½’ä¸€åŒ–åˆ°æœ€çŸ­è·¯å¾„
+		if (delta <= -4096.f)//æœºæ¢°è§’å½’ä¸€åŒ–
 			delta += 8192.f;
 		else if (delta >= 4096.f)
 			delta -= 8291.f;
-		if (abs(delta) >= 10.f) //ËÀÇøÉèÖÃ£¬ºöÂÔĞ¡Îó²î
-			mark_yaw += pantile_PID[PANTILE::YAW].Delta(delta); //ÔöÁ¿Ê½PID¿ØÖÆ
+		if (abs(delta) >= 10.f) //æ­»åŒºè®¾ç½®ï¼Œå¿½ç•¥å°è¯¯å·®
+			mark_yaw += pantile_PID[PANTILE::YAW].Delta(delta); //å¢é‡å¼PIDæ§åˆ¶
 	}
-	else if (type==PITCH)// PITCH·½Ïò¿ØÖÆ£¬·½·¨Í¬ÉÏ
+	else if (type==PITCH)// PITCHæ–¹å‘æ§åˆ¶ï¼Œæ–¹æ³•åŒä¸Š
 	{
 		delta = degreeToMechanical(ctrl.GetDelta(angleKeep - frameOfReference.GetAnglePitch()));
 
@@ -95,39 +118,39 @@ void CONTROL::PANTILE::Keep_Pantile(float angleKeep, PANTILE::TYPE type,IMU fram
 			
 		if (abs(delta) >= 10.f)
 		{
-			mark_pitch += pantile_PID[PANTILE::PITCH].Delta(delta);//ÔöÁ¿Ê½PID¿ØÖÆ
+			mark_pitch += pantile_PID[PANTILE::PITCH].Delta(delta);//å¢é‡å¼PIDæ§åˆ¶
 		}
 	}
 }
 
-void CONTROL::CHASSIS::Keep_Direction() //Ê¹µÃµ×ÅÌÔË¶¯·½Ïò°´ÕÕÔÆÌ¨Õı·½ÏòĞŞÕı£¬Ğ¡ÍÓÂİÊ±Ê¹ÓÃ
+void CONTROL::CHASSIS::Keep_Direction() //ä½¿å¾—åº•ç›˜è¿åŠ¨æ–¹å‘æŒ‰ç…§äº‘å°æ­£æ–¹å‘ä¿®æ­£ï¼Œå°é™€èºæ—¶ä½¿ç”¨
 {
-	double s_x = speedx, s_y = speedy;//¼ÇÂ¼Ô­Ê¼µÄÒ¡¸ËÊäÈëËÙ¶È
+	double s_x = speedx, s_y = speedy;//è®°å½•åŸå§‹çš„æ‘‡æ†è¾“å…¥é€Ÿåº¦
 
-	double theat = (-1.f) * ctrl.GetDelta(mechanicalToDegree(ctrl.pantile_motor[PANTILE::TYPE::YAW]->angle[now])// ¼ÆËãÔÆÌ¨Ïà¶ÔÓÚµ×ÅÌµÄĞı×ª½Ç¶Ètheta
-					- mechanicalToDegree(para.initial_yaw)) * PI / 180.f;//initial_yawÊÇ³õÊ¼»¯Ê±È·¶¨µÄ£¬¾ÍÊÇµ×ÅÌÕıÇ°·½¶ÔÓ¦µÄÔÆÌ¨µÄyawÖµ£¬×ª»¯Îª»¡¶ÈÖÆ
+	double theat = (-1.f) * ctrl.GetDelta(mechanicalToDegree(ctrl.pantile_motor[PANTILE::TYPE::YAW]->angle[now])// è®¡ç®—äº‘å°ç›¸å¯¹äºåº•ç›˜çš„æ—‹è½¬è§’åº¦theta
+					- mechanicalToDegree(para.initial_yaw)) * PI / 180.f;//initial_yawæ˜¯åˆå§‹åŒ–æ—¶ç¡®å®šçš„ï¼Œå°±æ˜¯åº•ç›˜æ­£å‰æ–¹å¯¹åº”çš„äº‘å°çš„yawå€¼ï¼Œè½¬åŒ–ä¸ºå¼§åº¦åˆ¶
 
-	double st = sin(theat);//¼ÆËã½Ç¶ÈµÄÕıÏÒºÍÓàÏÒÖµ
+	double st = sin(theat);//è®¡ç®—è§’åº¦çš„æ­£å¼¦å’Œä½™å¼¦å€¼
 	double ct = cos(theat);
 
-	//Ó¦ÓÃ¶şÎ¬Ğı×ª¾ØÕó¹«Ê½£¬speedx ºÍ speedy ¸üĞÂÎª¡°³µÌå×ø±êÏµ¡±ÏÂµÄÕıÈ·ËÙ¶È
+	//åº”ç”¨äºŒç»´æ—‹è½¬çŸ©é˜µå…¬å¼ï¼Œspeedx å’Œ speedy æ›´æ–°ä¸ºâ€œè½¦ä½“åæ ‡ç³»â€ä¸‹çš„æ­£ç¡®é€Ÿåº¦
 	speedx = s_x * ct - s_y * st;
 	speedy = s_x * st + s_y * ct;
 }
 
-void CONTROL::manual_chassis(int32_t _speedx, int32_t _speedy, int32_t _speedz)//µ×ÅÌ¿ØÖÆ£¬Êä³öspeedx, y, z,»¹ĞèÒª¾­¹ıÔË¶¯Ñ§½âËã·ÖÅäµ½¸÷¸öµç»ú
+void CONTROL::manual_chassis(int32_t _speedx, int32_t _speedy, int32_t _speedz)//åº•ç›˜æ§åˆ¶ï¼Œè¾“å‡ºspeedx, y, z,è¿˜éœ€è¦ç»è¿‡è¿åŠ¨å­¦è§£ç®—åˆ†é…åˆ°å„ä¸ªç”µæœº
 {
 	_speedx *= 1;
 	_speedy *= -1;
-	_speedz *= -1;//·½ÏòÏà·´ÔÚÕâÀïĞŞ¸ÄÕı¸º
+	_speedz *= -1;//æ–¹å‘ç›¸ååœ¨è¿™é‡Œä¿®æ”¹æ­£è´Ÿ
 
 	float setX, setY, setZ;
-	//¼ÆËã×ÜËÙ¶È
+	//è®¡ç®—æ€»é€Ÿåº¦
 	float _total_speed = sqrt(_speedx * _speedx + _speedy * _speedy + _speedz * _speedz);
-	//¼ì²éÊÇ·ñ³¬ËÙ
+	//æ£€æŸ¥æ˜¯å¦è¶…é€Ÿ
 	if (_total_speed > 9000)
 	{
-		float scale = 9000 / _total_speed;//Ëõ·Å±ÈÀı£¬±Ø¶¨Ğ¡ÓÚ1
+		float scale = 9000 / _total_speed;//ç¼©æ”¾æ¯”ä¾‹ï¼Œå¿…å®šå°äº1
 		setX = _speedx * scale;
 		setY = _speedy * scale;
 		setZ = _speedz * scale;
@@ -138,7 +161,7 @@ void CONTROL::manual_chassis(int32_t _speedx, int32_t _speedy, int32_t _speedz)/
 		setY = _speedy;
 		setZ = _speedz;
 	}
-	//½«´¦ÀíºóµÄÖµ¸³¸ø¶ÔÓ¦speed
+	//å°†å¤„ç†åçš„å€¼èµ‹ç»™å¯¹åº”speed
 	total_speed = sqrt(setX * setX + setY * setY + setZ * setZ);
 	this->chassis.speedx = setX;
 	this->chassis.speedy = setY;
@@ -147,14 +170,14 @@ void CONTROL::manual_chassis(int32_t _speedx, int32_t _speedy, int32_t _speedz)/
 
 void CONTROL::CHASSIS::Update() 
 {
-	if (ctrl.mode[now] == RESET) //reset×´Ì¬ÖÃÁã
+	if (ctrl.mode[now] == RESET) //resetçŠ¶æ€ç½®é›¶
 	{
 		speedx = 0;
 		speedy = 0;
 		speedz = 0;
 	}
 
-	//ÔË¶¯Ñ§½âËã
+	//è¿åŠ¨å­¦è§£ç®—
 	ctrl.chassis_motor[0]->setspeed = Ramp_plus(+speedy + speedx - speedz, ctrl.chassis_motor[0]->setspeed, 25, 80);
 	ctrl.chassis_motor[1]->setspeed = Ramp_plus(-speedy + speedx - speedz, ctrl.chassis_motor[1]->setspeed, 25, 80);
 	ctrl.chassis_motor[2]->setspeed = Ramp_plus(-speedy - speedx - speedz, ctrl.chassis_motor[2]->setspeed, 25, 80);
@@ -163,21 +186,65 @@ void CONTROL::CHASSIS::Update()
 
 void CONTROL::PANTILE::Update()
 {
-	if (ctrl.mode[now] == RESET)// resetÄ£Ê½³õÊ¼»¯yawºÍpitch
+	//é”™è¯¯å¤„ç†ï¼Œé™€èºä»ªæ–­ç”µè¿‡ä¹…
+	static float last_AngleYaw = 0;
+	static float last_AnglePitch = 0;
+	static float last_AngleRoll = 0;
+	if (last_AngleYaw == imu_pantile.GetAngleYaw() && last_AnglePitch == imu_pantile.GetAnglePitch() && last_AngleRoll == imu_pantile.GetAngleRoll())
 	{
-		mark_yaw = para.initial_yaw;
+		Imucount++;
+		if (Imucount > 6000)
+		{
+			imu_err_flag = true;
+			return;
+		}
+	}
+	else
+	{
+		Imucount = 0;
+		imu_err_flag = false;
+	}
+	last_AngleYaw = imu_pantile.GetAngleYaw();
+	last_AnglePitch = imu_pantile.GetAnglePitch();
+	last_AngleRoll = imu_pantile.GetAngleRoll();
+
+
+	//æ›´æ–°äº‘å°ç”µæœºå¯¹åº”IMUå€¼
+	ctrl.pantile_motor[0]->imuValue = imu_pantile.GetAngleYaw();
+
+	//æ›´æ–°å¯¹æ­£æ—¶å€™çš„é™€èºä»ªè§’åº¦
+	if (fabs(ctrl.pantile_motor[PANTILE::YAW]->angle[now] - para.initial_yaw) < 5.f)
+	{
+		initialImuYaw = imu_pantile.GetAngleYaw();
+	}
+
+	// resetæ¨¡å¼åˆå§‹åŒ–yawå’Œpitch
+	if (ctrl.mode[now] == RESET)
+	{
+		markImuYaw = initialImuYaw;
 		mark_pitch = para.initial_pitch;
 	}
 
-	if (mark_yaw > 8192.0)mark_yaw -= 8192.0;//´¦Àí»·ÈÆ£¬¹éÒ»»¯
-	if (mark_yaw < 0.0)mark_yaw += 8192.0;
+	//å¤„ç†ç¯ç»•ï¼Œå½’ä¸€åŒ–ï¼Œä½¿ç”¨æœºæ¢°è§’æ—¶
+	if (mark_yaw > 8192.0)
+	{
+		mark_yaw -= 8192.0;
+	}
+	if (mark_yaw < 0.0)
+	{
+		mark_yaw += 8192.0;
+	}
 
-	//¶Ôpitch½øĞĞÏŞÎ»
+	//å¯¹pitchè¿›è¡Œé™ä½
 	mark_pitch = std::max(std::min(mark_pitch, para.pitch_max), para.pitch_min);
 
-	//Êä³ö¸øµç»úYAWºÍPITCH
-	ctrl.pantile_motor[PANTILE::YAW]->setangle = mark_yaw;
+	//è¾“å‡ºç»™ç”µæœºYAWå’ŒPITCH
+	ctrl.pantile_motor[0]->setImuValue = markImuYaw;
+
+	/*ctrl.pantile_motor[PANTILE::YAW]->setangle = mark_yaw;*/
+
 	ctrl.pantile_motor[PANTILE::PITCH]->setangle = mark_pitch;
+
 	DMmotor[0].setPos = mark_pitch;
 }
 
@@ -190,23 +257,23 @@ void CONTROL::SHOOTER::Update()
 		supply_bullet = false;
 		auto_shoot = false;
 	}
-	if (openRub)
+	if (openRub)//å¼€ç«æ§åˆ¶æ‘©æ“¦è½®
 	{
 		ctrl.shooter_motor[0]->setspeed = 6000;
 		ctrl.shooter_motor[1]->setspeed = -6000;
 	}
-	else
+	else//åœæ­¢æ‘©æ“¦è½®
 	{
 		ctrl.shooter_motor[0]->setspeed = 0;
 		ctrl.shooter_motor[1]->setspeed = 0;
 	}
 
-	if (supply_bullet && openRub)
+	if (supply_bullet && openRub)//å¦‚æœå¼€ç«å’Œä¾›å¼¹
 	{
-		if (auto_shoot)
+		if (auto_shoot)//å¦‚æœè‡ªåŠ¨å°„å‡»
 		{
 			ctrl.supply_motor[0]->setspeed = 2160;
-			ctrl.supply_motor[0]->spinning = true;
+			ctrl.supply_motor[0]->spinning = true;//spiningä¸€ç§’å…«å‘
 		}
 		else
 		{
@@ -271,7 +338,7 @@ float CONTROL::CHASSIS::Ramp_plus(float setval, float curval, float Increase_Val
 	return curval;
 }
 
-float CONTROL::GetDelta(float delta) //¼ÆËã½Ç¶È×î¶ÌÂ·¾¶
+float CONTROL::GetDelta(float delta) //è®¡ç®—è§’åº¦æœ€çŸ­è·¯å¾„
 {
 	if (delta <= -180.f)
 	{
@@ -285,9 +352,70 @@ float CONTROL::GetDelta(float delta) //¼ÆËã½Ç¶È×î¶ÌÂ·¾¶
 	return delta;
 }
 
-int16_t CONTROL::Setrange(const int16_t original, const int16_t range)//ÏŞ·ùº¯Êı
+int16_t CONTROL::Setrange(const int16_t original, const int16_t range)//é™å¹…å‡½æ•°
 {
 	return fmaxf(fminf(range, original), -range);
+}
+
+void CONTROL::Control_AutoAim()//è‡ªç„æ§åˆ¶å‡½æ•°
+{
+	// æ£€æŸ¥è§†è§‰ç³»ç»Ÿæ˜¯å¦æœ‰ç›®æ ‡æ•°æ®
+	if (xuc.RxNuc_TJ.mode_TJ != 0)  //è¡¨ç¤ºæ˜¯å¦æ£€æµ‹åˆ°ç›®æ ‡
+	{
+		// è¯»å–è§†è§‰ç³»ç»Ÿæä¾›çš„ç›®æ ‡ä¿¡æ¯ï¼ˆå¼§åº¦åˆ¶ï¼‰
+		float target_yaw = xuc.RxNuc_TJ.yaw_TJ;         // ç›®æ ‡yawè§’åº¦ï¼ˆå¼§åº¦ï¼‰
+		float target_pitch = xuc.RxNuc_TJ.pitch_TJ;     // ç›®æ ‡pitchè§’åº¦ï¼ˆå¼§åº¦ï¼‰
+		float target_yaw_vel = xuc.RxNuc_TJ.yaw_vel_TJ;   // ç›®æ ‡yawè§’é€Ÿåº¦ï¼ˆå¼§åº¦/ç§’ï¼‰
+		float target_pitch_vel = xuc.RxNuc_TJ.pitch_vel_TJ; // ç›®æ ‡pitchè§’é€Ÿåº¦ï¼ˆå¼§åº¦/ç§’ï¼‰
+		float target_yaw_acc = xuc.RxNuc_TJ.yaw_acc_TJ;   // ç›®æ ‡yawè§’åŠ é€Ÿåº¦ï¼ˆå¼§åº¦/ç§’Â²ï¼‰
+		float target_pitch_acc = xuc.RxNuc_TJ.pitch_acc_TJ; // ç›®æ ‡pitchè§’åŠ é€Ÿåº¦ï¼ˆå¼§åº¦/ç§’Â²ï¼‰
+
+		// å°†å¼§åº¦åˆ¶è½¬æ¢ä¸ºæœºæ¢°è§’å•ä½ï¼ˆ0-8191å¯¹åº”0-360åº¦ï¼‰
+		float yaw_angle_mech = target_yaw / (2 * PI) * 8192;
+		float pitch_angle_mech = target_pitch / (2 * PI) * 8192;
+		cmd_pitch = target_pitch * 57.3;
+		cmd_yaw = target_yaw * 57.3;
+		// è®¡ç®—yawè½´å‰é¦ˆè¡¥å¿
+		float yaw_vel_feedforward = autoaim_ff.yaw_vel_ff * target_yaw_vel / (2 * PI) * 8192;
+		float yaw_acc_feedforward = autoaim_ff.yaw_acc_ff * target_yaw_acc / (2 * PI) * 8192;
+
+		// è®¡ç®—pitchè½´å‰é¦ˆè¡¥å¿
+		float pitch_vel_feedforward = autoaim_ff.pitch_vel_ff * target_pitch_vel / (2 * PI) * 8192;
+		float pitch_acc_feedforward = autoaim_ff.pitch_acc_ff * target_pitch_acc / (2 * PI) * 8192;
+
+		//// æ›´æ–°äº‘å°ç›®æ ‡è§’åº¦ï¼ˆç›®æ ‡è§’åº¦ + é€Ÿåº¦å‰é¦ˆ + åŠ é€Ÿåº¦å‰é¦ˆï¼‰
+		//pantile.mark_yaw = yaw_angle_mech;
+		////+ yaw_vel_feedforward + yaw_acc_feedforward;
+		//pantile.mark_pitch = pitch_angle_mech;
+		//// +pitch_vel_feedforward + pitch_acc_feedforward;
+
+		// ç«æ§é€»è¾‘
+		// mode_TJ: 0=ä¸æ§åˆ¶, 1=æ§åˆ¶äº‘å°ä½†ä¸å¼€ç«, 2=æ§åˆ¶äº‘å°ä¸”å¼€ç«
+		if (xuc.RxNuc_TJ.mode_TJ == 2)
+		{
+			// è§†è§‰ç³»ç»Ÿè¯·æ±‚å¼€ç«
+			shooter.openRub = false;        // å¯åŠ¨æ‘©æ“¦è½®
+			shooter.supply_bullet = true;  // å¯åŠ¨ä¾›å¼¹
+			shooter.auto_shoot = true;     // è‡ªåŠ¨å°„å‡»æ¨¡å¼
+			//supply_motor[0]->setspeed = -2500;   // ä¾›å¼¹
+		}
+		else if (xuc.RxNuc_TJ.mode_TJ == 1)
+		{
+			// åªæ§åˆ¶äº‘å°ï¼Œä¸å¼€ç«ä½†ä¿æŒæ‘©æ“¦è½®è¿è½¬ï¼ˆå¿«é€Ÿå“åº”ï¼‰
+			shooter.openRub = false;        // ä¿æŒæ‘©æ“¦è½®è¿è½¬
+			shooter.supply_bullet = false; // åœæ­¢ä¾›å¼¹
+			shooter.auto_shoot = false;    // å…³é—­è‡ªåŠ¨å°„å‡»
+			supply_motor[0]->setspeed = 0;   // ä¾›å¼¹åœæ­¢
+		}
+	}
+	else
+	{
+		// æ²¡æœ‰æ£€æµ‹åˆ°ç›®æ ‡ï¼Œåœæ­¢å°„å‡»
+		shooter.openRub = false;
+		shooter.supply_bullet = false;
+		shooter.auto_shoot = false;
+		supply_motor[0]->setspeed = 0;   // ä¾›å¼¹åœæ­¢
+	}
 }
 
 extern uint8_t Power_stsRx[];
