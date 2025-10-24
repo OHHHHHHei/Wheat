@@ -47,7 +47,7 @@ void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //云台控制
 	ch_yaw *= (1.f);//方向相反修改这里正负
 	float pitch_adjangle = this->pantile.sensitivity; //sensitivity是基础的灵敏度。
 	float yaw_adjangle = this->pantile.sensitivity * 20;
-
+	
 
 	//小陀螺的云台控制
 	if (ctrl.mode[now] == CONTROL::ROTATION)
@@ -370,11 +370,10 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 		float target_yaw_acc = xuc.RxNuc_TJ.yaw_acc_TJ;   // 目标yaw角加速度（弧度/秒²）
 		float target_pitch_acc = xuc.RxNuc_TJ.pitch_acc_TJ; // 目标pitch角加速度（弧度/秒²）
 
-		// 将弧度制转换为机械角单位（0-8191对应0-360度）
-		float yaw_angle_mech = target_yaw / (2 * PI) * 8192;
-		float pitch_angle_mech = target_pitch / (2 * PI) * 8192;
-		cmd_pitch = target_pitch * 57.3;
+		//yaw用陀螺仪的值来控制
 		cmd_yaw = target_yaw * 57.3;
+		//pitch用弧度制来控制
+		cmd_pitch = target_pitch;
 		// 计算yaw轴前馈补偿
 		float yaw_vel_feedforward = autoaim_ff.yaw_vel_ff * target_yaw_vel / (2 * PI) * 8192;
 		float yaw_acc_feedforward = autoaim_ff.yaw_acc_ff * target_yaw_acc / (2 * PI) * 8192;
@@ -383,26 +382,27 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 		float pitch_vel_feedforward = autoaim_ff.pitch_vel_ff * target_pitch_vel / (2 * PI) * 8192;
 		float pitch_acc_feedforward = autoaim_ff.pitch_acc_ff * target_pitch_acc / (2 * PI) * 8192;
 
-		//// 更新云台目标角度（目标角度 + 速度前馈 + 加速度前馈）
-		//pantile.mark_yaw = yaw_angle_mech;
-		////+ yaw_vel_feedforward + yaw_acc_feedforward;
-		//pantile.mark_pitch = pitch_angle_mech;
-		//// +pitch_vel_feedforward + pitch_acc_feedforward;
+		// 更新云台目标角度（目标角度 + 速度前馈 + 加速度前馈）
+		pantile.markImuYaw = cmd_yaw;
+		//+ yaw_vel_feedforward + yaw_acc_feedforward;
+		
+		pantile.mark_pitch = cmd_pitch;
+		// +pitch_vel_feedforward + pitch_acc_feedforward;
 
 		// 火控逻辑
 		// mode_TJ: 0=不控制, 1=控制云台但不开火, 2=控制云台且开火
 		if (xuc.RxNuc_TJ.mode_TJ == 2)
 		{
 			// 视觉系统请求开火
-			shooter.openRub = false;        // 启动摩擦轮
+			shooter.openRub = true;        // 启动摩擦轮
 			shooter.supply_bullet = true;  // 启动供弹
 			shooter.auto_shoot = true;     // 自动射击模式
-			//supply_motor[0]->setspeed = -2500;   // 供弹
+			supply_motor[0]->setspeed = -2500;   // 供弹
 		}
 		else if (xuc.RxNuc_TJ.mode_TJ == 1)
 		{
 			// 只控制云台，不开火但保持摩擦轮运转（快速响应）
-			shooter.openRub = false;        // 保持摩擦轮运转
+			shooter.openRub = true;        // 保持摩擦轮运转
 			shooter.supply_bullet = false; // 停止供弹
 			shooter.auto_shoot = false;    // 关闭自动射击
 			supply_motor[0]->setspeed = 0;   // 供弹停止
