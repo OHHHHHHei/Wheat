@@ -45,8 +45,8 @@ void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //云台控制
 {
 	ch_pitch *= (-1.f);
 	ch_yaw *= (1.f);//方向相反修改这里正负
-	float pitch_adjangle = this->pantile.sensitivity; //sensitivity是基础的灵敏度。
-	float yaw_adjangle = this->pantile.sensitivity * 20;
+	float pitch_adjangle = this->pantile.sensitivity / 2.f; //sensitivity是基础的灵敏度。
+	float yaw_adjangle = this->pantile.sensitivity * 20.f;
 	
 
 	//小陀螺的云台控制
@@ -59,6 +59,7 @@ void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //云台控制
 			pantile.markImuYaw = imu_pantile.GetAngleYaw();
 		}
 
+		// 机械角控制云台的小陀螺控制逻辑
 		if (pantile_motor[0]->mode == POS)
 		{
 			// YAW轴：根据摇杆输入更新IMU目标角度，使用绝对角度控制（抵消底盘旋转）
@@ -67,9 +68,19 @@ void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //云台控制
 			// PITCH轴：不受底盘旋转影响，直接使用机械角度控制
 			ctrl.pantile.mark_pitch -= (float)(pitch_adjangle * ch_pitch);
 		}
+
+		// 陀螺仪控制云台的小陀螺控制逻辑
+		if (pantile_motor[0]->mode == POS2)
+		{
+			// YAW轴：根据摇杆输入更新IMU目标角度
+			pantile.markImuYaw = GetDelta(pantile.markImuYaw - ch_yaw * yaw_adjangle);
+			// PITCH控制
+			ctrl.pantile.mark_pitch -= (float)(pitch_adjangle * ch_pitch);
+		}
+
 	}
 	else {
-		//陀螺仪控制
+		//陀螺仪控制云台控制逻辑
 		if (pantile_motor[0]->mode == POS2)
 		{
 			// YAW轴：根据摇杆输入更新IMU目标角度
@@ -80,7 +91,7 @@ void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //云台控制
 			pantile.mark_yaw -= (float)(yaw_adjangle * ch_yaw);
 		}
 
-		//pitch控制
+		//PITCH控制
 		pantile.mark_pitch -= (float)(pitch_adjangle * ch_pitch);
 
 		//ctrl.pantile.mark_pitch -= (float)(pitch_adjangle * ch_pitch);//改变pitch目标值
@@ -90,7 +101,8 @@ void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //云台控制
 	mode[pre] = mode[now];
 }
 
-void CONTROL::PANTILE::Keep_Pantile(float angleKeep, PANTILE::TYPE type,IMU frameOfReference)//保持云台固定在绝对位置，小陀螺时使用
+//保持云台固定在绝对位置，机械角小陀螺时使用
+void CONTROL::PANTILE::Keep_Pantile(float angleKeep, PANTILE::TYPE type,IMU frameOfReference)
 {
 	float delta = 0, adjust = sensitivity;
 	if (type == YAW)//控制YAW方向
@@ -123,7 +135,8 @@ void CONTROL::PANTILE::Keep_Pantile(float angleKeep, PANTILE::TYPE type,IMU fram
 	}
 }
 
-void CONTROL::CHASSIS::Keep_Direction() //使得底盘运动方向按照云台正方向修正，小陀螺时使用
+// 使得底盘运动方向按照云台正方向修正，小陀螺时使用
+void CONTROL::CHASSIS::Keep_Direction()
 {
 	double s_x = speedx, s_y = speedy;//记录原始的摇杆输入速度
 
@@ -147,7 +160,7 @@ void CONTROL::manual_chassis(int32_t _speedx, int32_t _speedy, int32_t _speedz)/
 	float setX, setY, setZ;
 	//计算总速度
 	float _total_speed = sqrt(_speedx * _speedx + _speedy * _speedy + _speedz * _speedz);
-	//检查是否超速
+	//检查是否超速，9000为最大速度
 	if (_total_speed > 9000)
 	{
 		float scale = 9000 / _total_speed;//缩放比例，必定小于1
@@ -169,8 +182,9 @@ void CONTROL::manual_chassis(int32_t _speedx, int32_t _speedy, int32_t _speedz)/
 }
 
 void CONTROL::CHASSIS::Update() 
-{
-	if (ctrl.mode[now] == RESET) //reset状态置零
+{	
+	//RESET时，底盘速度置零
+	if (ctrl.mode[now] == RESET)
 	{
 		speedx = 0;
 		speedy = 0;
@@ -338,7 +352,8 @@ float CONTROL::CHASSIS::Ramp_plus(float setval, float curval, float Increase_Val
 	return curval;
 }
 
-float CONTROL::GetDelta(float delta) //计算角度最短路径
+//计算角度最短路径,0-360度
+float CONTROL::GetDelta(float delta) 
 {
 	if (delta <= -180.f)
 	{
@@ -352,7 +367,8 @@ float CONTROL::GetDelta(float delta) //计算角度最短路径
 	return delta;
 }
 
-int16_t CONTROL::Setrange(const int16_t original, const int16_t range)//限幅函数
+//限幅函数
+int16_t CONTROL::Setrange(const int16_t original, const int16_t range)
 {
 	return fmaxf(fminf(range, original), -range);
 }
@@ -397,7 +413,13 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 			shooter.openRub = true;        // 启动摩擦轮
 			shooter.supply_bullet = true;  // 启动供弹
 			shooter.auto_shoot = true;     // 自动射击模式
-			supply_motor[0]->setspeed = -2500;   // 供弹
+
+			// 双重火控模式，上位机和遥控器同时发出供弹指令再开始供弹
+			if (abs(rc.rc.ch[3]) > 330)
+			{
+				supply_motor[0]->setspeed = -2500;   // 供弹
+			}
+
 		}
 		else if (xuc.RxNuc_TJ.mode_TJ == 1)
 		{

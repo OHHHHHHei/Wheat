@@ -106,14 +106,15 @@ void RC::OnRC()
 		{
 			// 给小陀螺模式的自旋速度做补偿，计算摇杆推出的距离大小，记录推杆力气不记录方向
 			float RCv_xy = sqrt(pow(rc.ch[1], 2.f) + pow(rc.ch[0], 2.f)) / 660.f;
-			// 平移会降低转速，于是提前主动增加一点转速来弥补这个损失
-			ctrl.manual_chassis(rc.ch[1] * MAXSPEED / 660, -rc.ch[0] * MAXSPEED / 660, para.rota_speed + RCv_xy);
-			ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
 			ctrl.chassis.Keep_Direction(); // 控制正方向
+			ctrl.manual_chassis(rc.ch[1] * MAXSPEED / 660, -rc.ch[0] * MAXSPEED / 660, para.rota_speed + RCv_xy);// 平移会降低转速，于是提前主动增加一点转速来弥补这个损失
+			ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
+			//实战下小陀螺时候的自瞄与发弹
+			//ctrl.Control_AutoAim();  // 调用自瞄控制函数
 			break;
 		}
 
-		case CONTROL::SHOOT: // 开火模式
+		case CONTROL::SHOOT: // 单独开火模式
 		{
 			ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
 			ctrl.shooter.openRub = true;//开摩擦轮
@@ -126,29 +127,12 @@ void RC::OnRC()
 			{
 				ctrl.supply_motor[0]->setspeed = 0;
 			}
-			/*if (abs(rc.ch[0]) > 330)
-			{
-				ctrl.shooter.openRub = true;
-			}
-			else
-			{
-				ctrl.shooter.openRub = false;
-			}*/
 			break;
 		}
 
 		case CONTROL::AUTO:
 		{
 			ctrl.Control_AutoAim();  // 调用自瞄控制函数
-			/*//开启供弹，自瞄中手控逻辑存在问题
-			if (abs(rc.ch[2]) > 330)
-			{
-				ctrl.supply_motor[0]->setspeed = -2500;//供弹
-			}
-			else
-			{
-				ctrl.supply_motor[0]->setspeed = 0;
-			}*/
 			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f);   // 丢弃Y轴方向控制
 		}
 
