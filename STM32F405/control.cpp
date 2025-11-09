@@ -419,6 +419,9 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 			{
 				supply_motor[0]->setspeed = -2500;   // 供弹
 			}
+			else {
+				supply_motor[0]->setspeed = 0;   // 供弹停止
+			}
 
 		}
 		else if (xuc.RxNuc_TJ.mode_TJ == 1)
@@ -428,6 +431,13 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 			shooter.supply_bullet = false; // 停止供弹
 			shooter.auto_shoot = false;    // 关闭自动射击
 			supply_motor[0]->setspeed = 0;   // 供弹停止
+			//if (abs(rc.rc.ch[3]) > 330)
+			//{
+			//	supply_motor[0]->setspeed = -2500;   // 供弹
+			//}
+			//else {
+			//	supply_motor[0]->setspeed = 0;   // 供弹停止
+			//}
 		}
 	}
 	else
