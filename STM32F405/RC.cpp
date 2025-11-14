@@ -123,7 +123,7 @@ void RC::OnRC()
 			if (abs(rc.ch[0]) > 330)
 			{
 				ctrl.shooter.supply_bullet = true;
-				ctrl.supply_motor[0]->setspeed = -1000;//¹©µ¯
+				ctrl.supply_motor[0]->setspeed = -2000;//¹©µ¯
 			}
 			else
 			{

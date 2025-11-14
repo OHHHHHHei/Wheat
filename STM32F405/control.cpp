@@ -7,6 +7,7 @@
 
 float cmd_pitch;
 float cmd_yaw;
+float cmd_flitered_yaw;
 
 void CONTROL::Init(std::vector<Motor*> motor) //初始化
 {
@@ -273,8 +274,8 @@ void CONTROL::SHOOTER::Update()
 	}
 	if (openRub)//开火控制摩擦轮
 	{
-		ctrl.shooter_motor[0]->setspeed = 6000;
-		ctrl.shooter_motor[1]->setspeed = -6000;
+		ctrl.shooter_motor[0]->setspeed = 7000;
+		ctrl.shooter_motor[1]->setspeed = -7000;
 	}
 	else//停止摩擦轮
 	{
@@ -282,24 +283,24 @@ void CONTROL::SHOOTER::Update()
 		ctrl.shooter_motor[1]->setspeed = 0;
 	}
 
-	//if (supply_bullet && openRub)//如果开火和供弹
-	//{
-	//	if (auto_shoot && manual_shoot)//如果火控和操作手同时同意开火，则开火(双重火控)
-	//	{
-	//		//ctrl.supply_motor[0]->setspeed = 1000;
-	//		//ctrl.supply_motor[0]->spinning = true;//spining一秒八发
-	//	}
-	//	else
-	//	{
-	//		ctrl.supply_motor[0]->setspeed = -1000;
-	//		ctrl.supply_motor[0]->spinning = true;
-	//	}
-	//}
-	//else 
-	//{
-	//	ctrl.supply_motor[0]->spinning = false;
-	//	ctrl.supply_motor[1]->spinning = false;
-	//}
+	if (supply_bullet && openRub)//如果开火和供弹
+	{
+		if (auto_shoot && manual_shoot)//如果火控和操作手同时同意开火，则开火(双重火控)
+		{
+			//ctrl.supply_motor[0]->setspeed = -1500;
+			ctrl.supply_motor[0]->spinning = true;//spining一秒八发
+		}
+		else
+		{
+			ctrl.supply_motor[0]->setspeed = 0;
+			ctrl.supply_motor[0]->spinning = false;
+		}
+	}
+	else 
+	{
+		ctrl.supply_motor[0]->spinning = false;
+		ctrl.supply_motor[1]->spinning = false;
+	}
 }
 
 float CONTROL::CHASSIS::Ramp(float setval, float curval, uint32_t RampSlope)
@@ -387,7 +388,8 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 		float target_pitch_acc = xuc.RxNuc_TJ.pitch_acc_TJ; // 目标pitch角加速度（弧度/秒²）
 
 		//yaw用陀螺仪的值来控制
-		cmd_yaw = target_yaw * 57.3 - 180;
+		cmd_yaw = target_yaw * 57.3;
+		//cmd_flitered_yaw = pantile.yawKalman.Filter(cmd_yaw);
 		//pitch用弧度制来控制
 		cmd_pitch = target_pitch;
 		// 计算yaw轴前馈补偿
@@ -400,7 +402,8 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 
 		// 更新云台目标角度（目标角度 + 速度前馈 + 加速度前馈）
 		pantile.markImuYaw = cmd_yaw;
-		//+ yaw_vel_feedforward + yaw_acc_feedforward;
+		//yaw_vel_feedforward;
+		//yaw_acc_feedforward;
 		
 		pantile.mark_pitch = cmd_pitch;
 		// +pitch_vel_feedforward + pitch_acc_feedforward;
@@ -426,11 +429,25 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 		}
 		else if (xuc.RxNuc_TJ.mode_TJ == 1)
 		{
-			// 只控制云台，不拨弹但保持摩擦轮运转（快速响应）
-			shooter.openRub = true;        // 保持摩擦轮运转
-			shooter.supply_bullet = false; // 停止供弹
-			shooter.auto_shoot = false;    // 关闭自动射击
-			supply_motor[0]->setspeed = 0;   // 供弹停止
+			//// 只控制云台，不拨弹但保持摩擦轮运转（快速响应）
+			//shooter.openRub = true;        // 保持摩擦轮运转
+			//shooter.supply_bullet = false; // 停止供弹
+			//shooter.auto_shoot = false;    // 关闭自动射击
+			//supply_motor[0]->setspeed = 0;   // 供弹停止
+
+			// 视觉系统请求开火
+			shooter.openRub = true;        // 启动摩擦轮
+			shooter.supply_bullet = true;  // 启动供弹
+			shooter.auto_shoot = true;     // 火控同意射击
+
+			// 双重火控模式，上位机和遥控器同时发出供弹指令再开始供弹
+			if (abs(rc.rc.ch[3]) > 330)
+			{
+				shooter.manual_shoot = true;
+			}
+			else {
+				shooter.manual_shoot = false;
+			}
 
 			
 		}

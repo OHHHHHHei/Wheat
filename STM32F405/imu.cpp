@@ -133,9 +133,9 @@ void IMU::GetQ()
 	// 为提高代码可读性和效率，预先计算半角的sin和cos值
 	// 注意：这里的 angle.xxx 必须是弧度单位！如果IMU输出的是角度，需要转换。
 	const float DEG_TO_RAD = 3.141592653589793f / 180.0f;
-	double yaw_rad = angle.yaw * DEG_TO_RAD;
-	double pitch_rad = angle.pitch * DEG_TO_RAD;
-	double roll_rad = angle.roll * DEG_TO_RAD;
+	double yaw_rad = (angle.yaw) * DEG_TO_RAD;
+	double pitch_rad = (angle.pitch) * DEG_TO_RAD;
+	double roll_rad = (angle.roll)* DEG_TO_RAD;
 
 	double cy = cos(yaw_rad * 0.5);
 	double sy = sin(yaw_rad * 0.5);

@@ -35,6 +35,7 @@ public:
 	struct PANTILE
 	{
 		enum TYPE { YAW, PITCH };
+		Kalman yawKalman{ 0.5f, 40.f };
 		float mark_pitch{}, mark_yaw{}, markImuYaw{}, initialImuYaw{};//各个目标角度
 		PID pantile_PID[3] = { {0.15f,0.f,0.f},{0.05f,0.f,0.f}, {0.f,0.f,0.f} };//YAW PITCH
 		const float sensitivity = 0.01f;
