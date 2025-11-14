@@ -35,8 +35,10 @@ Motor can1_motor[CAN1_MOTOR_NUM] = {
 	Motor(M3508,SPD, chassis, ID3, PID(2.3f, 0.f, 6.49e-4f, 0.f)),    //can1[0]~can1[3]底盘电机
 
 	//陀螺仪控制云台
-	Motor(M6020,POS2, pantile, ID7, PID(500.f, 0.f, 600.f, 0.f), PID(3.f, 0.f, 190.f, 0.25f)
+	Motor(M6020,POS2, pantile, ID7, PID(490.f, 0.f, 610.f, 0.f), PID(1.5f, 0.003f, 70.f, 0.25f)
 								, PID(0.f, 0.f, 0.f,0.f))//pid 0 speed     1 posititon
+	//Motor(M6020,POS2, pantile, ID7, PID(500.f, 0.f, 600.f, 0.f), PID(3.f, 0.f, 190.f, 0.25f)
+								//, PID(0.f, 0.f, 0.f,0.f))//pid 0 speed     1 posititon
 
 	//机械角控制云台
 	/*Motor(M6020,POS, pantile, ID7, PID(500.f, 0.f, 600.f, 0.f), PID(0.1f, 0.f, 1.4f, 0.25f)

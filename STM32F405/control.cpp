@@ -287,7 +287,7 @@ void CONTROL::SHOOTER::Update()
 	{
 		if (auto_shoot && manual_shoot)//如果火控和操作手同时同意开火，则开火(双重火控)
 		{
-			//ctrl.supply_motor[0]->setspeed = -1500;
+			ctrl.supply_motor[0]->setspeed = -1500;
 			ctrl.supply_motor[0]->spinning = true;//spining一秒八发
 		}
 		else
@@ -393,16 +393,15 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 		//pitch用弧度制来控制
 		cmd_pitch = target_pitch;
 		// 计算yaw轴前馈补偿
-		float yaw_vel_feedforward = autoaim_ff.yaw_vel_ff * target_yaw_vel / (2 * PI) * 8192;
-		float yaw_acc_feedforward = autoaim_ff.yaw_acc_ff * target_yaw_acc / (2 * PI) * 8192;
+		float yaw_vel_feedforward = autoaim_ff.yaw_vel_ff * target_yaw_vel;
+		float yaw_acc_feedforward = autoaim_ff.yaw_acc_ff * target_yaw_acc;
 
 		// 计算pitch轴前馈补偿
-		float pitch_vel_feedforward = autoaim_ff.pitch_vel_ff * target_pitch_vel / (2 * PI) * 8192;
-		float pitch_acc_feedforward = autoaim_ff.pitch_acc_ff * target_pitch_acc / (2 * PI) * 8192;
+		float pitch_vel_feedforward = autoaim_ff.pitch_vel_ff * target_pitch_vel;
+		float pitch_acc_feedforward = autoaim_ff.pitch_acc_ff * target_pitch_acc;
 
 		// 更新云台目标角度（目标角度 + 速度前馈 + 加速度前馈）
-		pantile.markImuYaw = cmd_yaw;
-		//yaw_vel_feedforward;
+		pantile.markImuYaw = cmd_yaw + yaw_vel_feedforward;
 		//yaw_acc_feedforward;
 		
 		pantile.mark_pitch = cmd_pitch;
@@ -448,8 +447,6 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 			else {
 				shooter.manual_shoot = false;
 			}
-
-			
 		}
 	}
 	else
