@@ -50,6 +50,7 @@ public:
 
 		float now_bullet_speed = 0.f;
 
+		bool manual_shoot = false;
 		bool auto_shoot = false;
 		bool openRub = false, supply_bullet = false;
 		bool fraction = false;

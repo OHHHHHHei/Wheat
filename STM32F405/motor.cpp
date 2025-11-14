@@ -113,7 +113,7 @@ void Motor::Ontimer(uint8_t idata[][8], uint8_t* odata)//idate: receive;odate: t
 			{
 				current += pid[speed].Delta(setspeed - curspeed);
 				current = setrange(current, maxcurrent);
-				uint8_t deviation = 200;
+				uint8_t deviation = 200;//¿ÉÈÝÈÌÎó²î
 				if (angle[now] >= stopAngle - deviation && angle[now] <= stopAngle + deviation)
 					need_curcircle--;
 				if (need_curcircle <= 0)
@@ -128,7 +128,7 @@ void Motor::Ontimer(uint8_t idata[][8], uint8_t* odata)//idate: receive;odate: t
 			else if (need_curcircle <= 0)
 			{
 				setspeed = 0;
-				current += pid[speed].Delta(setspeed - curspeed);
+				current += pid[speed].Delta(setspeed - curspeed);//Í£ÏÂ²¦µ¯
 				current = setrange(current, maxcurrent);
 			}
 		}

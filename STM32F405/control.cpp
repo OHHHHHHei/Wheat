@@ -282,24 +282,24 @@ void CONTROL::SHOOTER::Update()
 		ctrl.shooter_motor[1]->setspeed = 0;
 	}
 
-	if (supply_bullet && openRub)//如果开火和供弹
-	{
-		if (auto_shoot)//如果自动射击
-		{
-			ctrl.supply_motor[0]->setspeed = 2160;
-			ctrl.supply_motor[0]->spinning = true;//spining一秒八发
-		}
-		else
-		{
-			ctrl.supply_motor[0]->setspeed = 2160;
-			ctrl.supply_motor[0]->spinning = true;
-		}
-	}
-	else 
-	{
-		ctrl.supply_motor[0]->spinning = false;
-		ctrl.supply_motor[1]->spinning = false;
-	}
+	//if (supply_bullet && openRub)//如果开火和供弹
+	//{
+	//	if (auto_shoot && manual_shoot)//如果火控和操作手同时同意开火，则开火(双重火控)
+	//	{
+	//		//ctrl.supply_motor[0]->setspeed = 1000;
+	//		//ctrl.supply_motor[0]->spinning = true;//spining一秒八发
+	//	}
+	//	else
+	//	{
+	//		ctrl.supply_motor[0]->setspeed = -1000;
+	//		ctrl.supply_motor[0]->spinning = true;
+	//	}
+	//}
+	//else 
+	//{
+	//	ctrl.supply_motor[0]->spinning = false;
+	//	ctrl.supply_motor[1]->spinning = false;
+	//}
 }
 
 float CONTROL::CHASSIS::Ramp(float setval, float curval, uint32_t RampSlope)
@@ -387,7 +387,7 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 		float target_pitch_acc = xuc.RxNuc_TJ.pitch_acc_TJ; // 目标pitch角加速度（弧度/秒²）
 
 		//yaw用陀螺仪的值来控制
-		cmd_yaw = target_yaw * 57.3;
+		cmd_yaw = target_yaw * 57.3 - 180;
 		//pitch用弧度制来控制
 		cmd_pitch = target_pitch;
 		// 计算yaw轴前馈补偿
@@ -412,41 +412,37 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 			// 视觉系统请求开火
 			shooter.openRub = true;        // 启动摩擦轮
 			shooter.supply_bullet = true;  // 启动供弹
-			shooter.auto_shoot = true;     // 自动射击模式
+			shooter.auto_shoot = true;     // 火控同意射击
 
 			// 双重火控模式，上位机和遥控器同时发出供弹指令再开始供弹
 			if (abs(rc.rc.ch[3]) > 330)
 			{
-				supply_motor[0]->setspeed = -2500;   // 供弹
+				shooter.manual_shoot = true;
 			}
 			else {
-				supply_motor[0]->setspeed = 0;   // 供弹停止
+				shooter.manual_shoot = false;
 			}
 
 		}
 		else if (xuc.RxNuc_TJ.mode_TJ == 1)
 		{
-			// 只控制云台，不开火但保持摩擦轮运转（快速响应）
+			// 只控制云台，不拨弹但保持摩擦轮运转（快速响应）
 			shooter.openRub = true;        // 保持摩擦轮运转
 			shooter.supply_bullet = false; // 停止供弹
 			shooter.auto_shoot = false;    // 关闭自动射击
 			supply_motor[0]->setspeed = 0;   // 供弹停止
-			//if (abs(rc.rc.ch[3]) > 330)
-			//{
-			//	supply_motor[0]->setspeed = -2500;   // 供弹
-			//}
-			//else {
-			//	supply_motor[0]->setspeed = 0;   // 供弹停止
-			//}
+
+			
 		}
 	}
 	else
 	{
-		// 没有检测到目标，停止射击
+		// 没有检测到目标，停止射击, 手动控制云台
 		shooter.openRub = false;
 		shooter.supply_bullet = false;
 		shooter.auto_shoot = false;
 		supply_motor[0]->setspeed = 0;   // 供弹停止
+		Control_Pantile(rc.rc.ch[2] * para.yaw_speed / 660.f, -rc.rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
 	}
 }
 

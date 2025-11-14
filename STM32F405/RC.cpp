@@ -118,13 +118,16 @@ void RC::OnRC()
 		{
 			ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // ÔÆÌ¨¿ØÖÆ
 			ctrl.shooter.openRub = true;//¿ªÄ¦²ÁÂÖ
+
 			//¿ªÆô¹©µ¯
 			if (abs(rc.ch[0]) > 330)
 			{
-				ctrl.supply_motor[0]->setspeed = -2500;//¹©µ¯
+				ctrl.shooter.supply_bullet = true;
+				ctrl.supply_motor[0]->setspeed = -1000;//¹©µ¯
 			}
 			else
 			{
+				ctrl.shooter.supply_bullet = false;
 				ctrl.supply_motor[0]->setspeed = 0;
 			}
 			break;
