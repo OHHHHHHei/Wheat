@@ -66,6 +66,17 @@ void IMU::Decode()
 					angularvelocity.roll = R4(rxData + offset + 28);
 					angularvelocity.yaw = R4(rxData + offset + 32);
 					angle.pitch = R4(rxData + offset + 48);
+
+					//// 将新值存入循环缓冲区
+					//pitch_filter_buffer[pitch_filter_index] = angle.pitch;
+					//pitch_filter_index = (pitch_filter_index + 1) % 7;  // 循环索引：0→1→...→6→0
+
+					//// 计算7点均值（增强平滑效果）
+					//angle.pitch_filtered = (pitch_filter_buffer[0] + pitch_filter_buffer[1] + pitch_filter_buffer[2] +
+					//pitch_filter_buffer[3] + pitch_filter_buffer[4] + pitch_filter_buffer[5] +
+					//pitch_filter_buffer[6]) / 7.0f;
+
+
 					angle.roll = R4(rxData + offset + 52);
 					angle.yaw = R4(rxData + offset + 56);
 

@@ -98,7 +98,7 @@ void RC::OnRC()
 		case CONTROL::SEPARATE: // 分离模式
 		{
 			ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
-			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f);   // 分离模式我们丢弃Y轴方向控制
+			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, -rc.ch[0] * para.max_speed / 660.f, 0);   // 分离模式我们丢弃Y轴方向控制
 			break;
 		}
 

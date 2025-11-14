@@ -10,7 +10,7 @@ public:
 	float ACC_FSR = 4.f, GYRO_FSR = 2000.f;
 	typedef struct
 	{
-		float roll, yaw, pitch;
+		float roll, yaw, pitch, pitch_filtered;
 	}Angle, AngularVelocity;
 	typedef struct
 	{
@@ -38,6 +38,16 @@ private:
 	
 	uint16_t crc, len;
 	IMU_TYPE type;
+
+
+	// ===== Pitch均值滤波器（3点窗口，最小时滞） =====
+	// 使用3点滑动窗口进行均值滤波，平衡噪声抑制和响应速度
+	// 时滞约为 1.5 * 采样周期（CH010为115200波特率，约13ms延迟）
+	float pitch_filter_buffer[7] = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };  // 循环缓冲区
+	uint8_t pitch_filter_index = 0;                      // 当前写入位置
+	float pitch_filtered = 0.0f;                         // 滤波后的pitch值
+
+
 
 	uint8_t rxData[UART_MAX_LEN];
 	UART* m_uart;
