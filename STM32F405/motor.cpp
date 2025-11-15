@@ -3,7 +3,7 @@
 #include "HTmotor.h"
 #include "imu.h"
 #include "control.h"
-
+#include "RC.h"
 
 #define DEG_TO_RAD 0.017453292f  // π / 180
 Motor::Motor(const motor_type type, const motor_mode mode, const function_type function, const uint32_t id, PID _speed, PID _position, PID _speed2)
@@ -101,7 +101,6 @@ void Motor::Ontimer(uint8_t idata[][8], uint8_t* odata)//idate: receive;odate: t
 	//20220121--hz
 	if (mode == ACE)
 	{
-
 		if (spinning)//供弹专用
 		{
 			//1秒8发 36/1减速比 一圈八格
@@ -147,7 +146,6 @@ void Motor::Ontimer(uint8_t idata[][8], uint8_t* odata)//idate: receive;odate: t
 		setspeed = pid[position].Position(getdeltaa(setangle - angle[now]), 500);//500是PID最大限幅，这是角度环  position 1
 		setspeed = setrange(setspeed, maxspeed);//最大速度限幅;
 		current = pid[speed].Position(setspeed - curspeed, 500);//这是速度环  speed  0
-		current = currentKalman.Filter(current);//卡尔曼滤波
 		current = setrange(current, maxcurrent);//最大电流限幅
 	}
 	else if (mode == SPD)
@@ -190,22 +188,23 @@ void Motor::Ontimer(uint8_t idata[][8], uint8_t* odata)//idate: receive;odate: t
 				setspeed = pid[position].Position(error, 500);
 			} else {
 				//IMU角度环PID
-				setspeed = pid[position].Position(error, 1000);
+				setspeed = pid[position].Position(error, 1500);
 			}
 		}
 
 		setspeed = setrange(setspeed, maxspeed);//最大速度限幅;
+		filtered_speed = imu_pantile.angularvelocity.yaw / 6.f;
 		//机械角速度环
 		if (ctrl.mode[now] == 5)
 		{
 			setspeed = setrange(setspeed, maxspeed);
-			current = pid[position].Position(setspeed - curspeed, 2000);
+			// current = pid[position].Position(setspeed - curspeed, 2000);
 		}
 		else {
 			//IMU角度速度环
-			current = pid[speed].Position(speedKalman.Filter(setspeed - curspeed), 600);
+			current = pid[speed].Position(setspeed - filtered_speed, 2000);
 		}
-		current = currentKalman.Filter(current);//卡尔曼滤波
+		//current = currentKalman.Filter(current);//卡尔曼滤波
 		current = setrange(current, maxcurrent);
 
 

@@ -274,8 +274,8 @@ void CONTROL::SHOOTER::Update()
 	}
 	if (openRub)//开火控制摩擦轮
 	{
-		ctrl.shooter_motor[0]->setspeed = 7000;
-		ctrl.shooter_motor[1]->setspeed = -7000;
+		ctrl.shooter_motor[0]->setspeed = 6500;
+		ctrl.shooter_motor[1]->setspeed = -6500;
 	}
 	else//停止摩擦轮
 	{
@@ -289,7 +289,7 @@ void CONTROL::SHOOTER::Update()
 		{
 			if (auto_shoot && manual_shoot)//如果火控和操作手同时同意开火，则开火(双重火控)
 			{
-				ctrl.supply_motor[0]->setspeed = -1500;
+				ctrl.supply_motor[0]->setspeed = -700;
 				ctrl.supply_motor[0]->spinning = true;//spining一秒八发
 			}
 			else
@@ -408,7 +408,7 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 
 		//yaw用陀螺仪的值来控制
 		cmd_yaw = target_yaw * 57.3;
-		//cmd_flitered_yaw = pantile.yawKalman.Filter(cmd_yaw);
+
 		//pitch用弧度制来控制
 		cmd_pitch = target_pitch;
 		// 计算yaw轴前馈补偿
@@ -431,7 +431,7 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 		if (xuc.RxNuc_TJ.mode_TJ == 2)
 		{
 			// 视觉系统请求开火
-			shooter.openRub = false;        // 启动摩擦轮
+			shooter.openRub = true;        // 启动摩擦轮
 			shooter.supply_bullet = true;  // 启动供弹
 			shooter.auto_shoot = true;     // 火控同意射击
 
@@ -454,7 +454,7 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 			//supply_motor[0]->setspeed = 0;   // 供弹停止
 
 			// 视觉系统请求开火
-			shooter.openRub = false;        // 启动摩擦轮
+			shooter.openRub = true;        // 启动摩擦轮
 			shooter.supply_bullet = true;  // 启动供弹
 			shooter.auto_shoot = true;     // 火控同意射击
 
@@ -475,7 +475,7 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 		shooter.supply_bullet = false;
 		shooter.auto_shoot = false;
 		supply_motor[0]->setspeed = 0;   // 供弹停止
-		Control_Pantile(rc.rc.ch[2] * para.yaw_speed / 660.f, -rc.rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
+		Control_Pantile(rc.rc.ch[2] * para.yaw_speed / 660.f, 0); // 云台控制
 	}
 }
 

@@ -5,6 +5,7 @@
 #include "math.h"
 #include "RC.h"
 #include "HTmotor.h"
+#include "control.h"
 
 int a = 0;
 
@@ -94,7 +95,7 @@ void XUC::Encode()
 	TxNuc_TJ.yaw_vel_TJ = imu_pantile.angularvelocity.yaw;
 	TxNuc_TJ.pitch_TJ = DMmotor[0].pos * 57.3;
 	TxNuc_TJ.pitch_vel_TJ = imu_pantile.angularvelocity.pitch;
-	TxNuc_TJ.bullet_speed_TJ = 1.f;
+	TxNuc_TJ.bullet_speed_TJ = 13.f;
 	TxNuc_TJ.bullet_count_TJ = 1.f; // 子弹累计发送次数
 
 	//TxNuc.header = 0x5A;
