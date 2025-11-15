@@ -14,7 +14,7 @@ public:
 	Motor* shooter_motor[SHOOTER_MOTOR_NUM]{};
 	Motor* supply_motor[SUPPLY_MOTOR_NUM]{};
 	
-	enum MODE { RESET, ROTATION, SEPARATE, FOLLOW, LOCK, TEST, AUTO, SHOOT, BLANK };
+	enum MODE { RESET, ROTATION, SEPARATE, FOLLOW, LOCK, TEST, AUTO, SHOOT, BLANK, SHENGSAI};
 	MODE mode[2];
 	float total_speed;
 
@@ -70,7 +70,7 @@ public:
 	{
 		float yaw_vel_ff = 1.85f;      // yaw速度前馈系数
 		float yaw_acc_ff = 0.1f;      // yaw加速度前馈系数  
-		float pitch_vel_ff = 0.5f;    // pitch速度前馈系数
+		float pitch_vel_ff = 0.05f;    // pitch速度前馈系数
 		float pitch_acc_ff = 0.1f;    // pitch加速度前馈系数
 	} autoaim_ff;
 	

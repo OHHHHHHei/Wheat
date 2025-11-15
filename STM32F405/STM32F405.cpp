@@ -37,8 +37,14 @@ Motor can1_motor[CAN1_MOTOR_NUM] = {
 	//陀螺仪控制云台
 	Motor(M6020,POS2, pantile, ID7, PID(490.f, 0.f, 610.f, 0.f), PID(1.5f, 0.003f, 70.f, 0.25f)
 								, PID(0.f, 0.f, 0.f,0.f))//pid 0 speed     1 posititon
+
+	//神经网络
+	//Motor(M6020,POS2, pantile, ID7, PID(490.f, 0.f, 610.f, 0.f), PID(1.5f, 0.003f, 70.f, 0.25f)
+	//							, PID(0.f, 0.f, 0.f,0.f))//pid 0 speed     1 posititon
+
+	//手控
 	//Motor(M6020,POS2, pantile, ID7, PID(500.f, 0.f, 600.f, 0.f), PID(3.f, 0.f, 190.f, 0.25f)
-								//, PID(0.f, 0.f, 0.f,0.f))//pid 0 speed     1 posititon
+	//							, PID(0.f, 0.f, 0.f,0.f))//pid 0 speed     1 posititon
 
 	//机械角控制云台
 	/*Motor(M6020,POS, pantile, ID7, PID(500.f, 0.f, 600.f, 0.f), PID(0.1f, 0.f, 1.4f, 0.25f)

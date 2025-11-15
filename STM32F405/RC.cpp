@@ -56,7 +56,8 @@ void RC::OnRC()
 	}
 	else if (rc.s[0] == UP && rc.s[1] == UP)//小陀螺模式    上上
 	{
-		ctrl.mode[now] = CONTROL::ROTATION;
+		ctrl.mode[now] = CONTROL::SHENGSAI;
+		//ctrl.mode[now] = CONTROL::ROTATION;
 	}
 	else if (rc.s[0] == MID && rc.s[1] == UP)//自瞄模式    中上
 	{
@@ -98,7 +99,7 @@ void RC::OnRC()
 		case CONTROL::SEPARATE: // 分离模式
 		{
 			ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
-			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, -rc.ch[0] * para.max_speed / 660.f, 0);   // 分离模式我们丢弃Y轴方向控制
+			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f);   // 分离模式我们丢弃Y轴方向控制
 			break;
 		}
 
@@ -137,6 +138,12 @@ void RC::OnRC()
 		{
 			ctrl.Control_AutoAim();  // 调用自瞄控制函数
 			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f);   // 丢弃Y轴方向控制
+		}
+
+		case CONTROL::SHENGSAI:
+		{
+			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, -rc.ch[0] * para.max_speed / 660.f, rc.ch[2] * para.max_speed / 660.f); //丢弃Z轴操控
+			break;
 		}
 
 		default:

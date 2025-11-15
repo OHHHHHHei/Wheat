@@ -404,15 +404,15 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 		pantile.markImuYaw = cmd_yaw + yaw_vel_feedforward;
 		//yaw_acc_feedforward;
 		
-		pantile.mark_pitch = cmd_pitch;
-		// +pitch_vel_feedforward + pitch_acc_feedforward;
+		pantile.mark_pitch = cmd_pitch + pitch_vel_feedforward;
+			//+ pitch_acc_feedforward;
 
 		// 火控逻辑
 		// mode_TJ: 0=不控制, 1=控制云台但不开火, 2=控制云台且开火
 		if (xuc.RxNuc_TJ.mode_TJ == 2)
 		{
 			// 视觉系统请求开火
-			shooter.openRub = true;        // 启动摩擦轮
+			shooter.openRub = false;        // 启动摩擦轮
 			shooter.supply_bullet = true;  // 启动供弹
 			shooter.auto_shoot = true;     // 火控同意射击
 
@@ -435,7 +435,7 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 			//supply_motor[0]->setspeed = 0;   // 供弹停止
 
 			// 视觉系统请求开火
-			shooter.openRub = true;        // 启动摩擦轮
+			shooter.openRub = false;        // 启动摩擦轮
 			shooter.supply_bullet = true;  // 启动供弹
 			shooter.auto_shoot = true;     // 火控同意射击
 

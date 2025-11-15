@@ -4,6 +4,7 @@
 #include "CRC.h"
 #include "math.h"
 #include "RC.h"
+#include "HTmotor.h"
 
 int a = 0;
 
@@ -91,7 +92,7 @@ void XUC::Encode()
 	}   // wxyz顺序
 	TxNuc_TJ.yaw_TJ = imu_pantile.angle.yaw;
 	TxNuc_TJ.yaw_vel_TJ = imu_pantile.angularvelocity.yaw;
-	TxNuc_TJ.pitch_TJ = imu_pantile.angle.pitch;
+	TxNuc_TJ.pitch_TJ = DMmotor[0].pos * 57.3;
 	TxNuc_TJ.pitch_vel_TJ = imu_pantile.angularvelocity.pitch;
 	TxNuc_TJ.bullet_speed_TJ = 1.f;
 	TxNuc_TJ.bullet_count_TJ = 1.f; // 子弹累计发送次数
