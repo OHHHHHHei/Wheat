@@ -68,7 +68,7 @@ public:
 	// 自瞄前馈参数
 	struct AUTOAIM_FEEDFORWARD
 	{
-		float yaw_vel_ff = 1.85f;      // yaw速度前馈系数
+		float yaw_vel_ff = 1.6f;      // yaw速度前馈系数
 		float yaw_acc_ff = 0.1f;      // yaw加速度前馈系数  
 		float pitch_vel_ff = 0.05f;    // pitch速度前馈系数
 		float pitch_acc_ff = 0.1f;    // pitch加速度前馈系数

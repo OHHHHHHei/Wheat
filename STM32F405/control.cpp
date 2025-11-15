@@ -282,25 +282,44 @@ void CONTROL::SHOOTER::Update()
 		ctrl.shooter_motor[0]->setspeed = 0;
 		ctrl.shooter_motor[1]->setspeed = 0;
 	}
-
-	if (supply_bullet && openRub)//如果开火和供弹
+	//自瞄供弹逻辑
+	if (ctrl.mode[now] == AUTO)
 	{
-		if (auto_shoot && manual_shoot)//如果火控和操作手同时同意开火，则开火(双重火控)
+		if (supply_bullet && openRub)//如果开火和供弹
 		{
-			ctrl.supply_motor[0]->setspeed = -1500;
+			if (auto_shoot && manual_shoot)//如果火控和操作手同时同意开火，则开火(双重火控)
+			{
+				ctrl.supply_motor[0]->setspeed = -1500;
+				ctrl.supply_motor[0]->spinning = true;//spining一秒八发
+			}
+			else
+			{
+				ctrl.supply_motor[0]->setspeed = -1500;
+				ctrl.supply_motor[0]->spinning = false;
+			}
+		}
+		else
+		{
+			ctrl.supply_motor[0]->spinning = false;
+			ctrl.supply_motor[1]->spinning = false;
+		}
+	}
+	else if (ctrl.mode[now] == SHOOT) //射击模式下供弹逻辑
+	{
+		if (abs(rc.rc.ch[0]) > 330)
+		{
+			ctrl.shooter.supply_bullet = true;
+			ctrl.supply_motor[0]->setspeed = -1500;//供弹
 			ctrl.supply_motor[0]->spinning = true;//spining一秒八发
 		}
 		else
 		{
+			ctrl.shooter.supply_bullet = false;
 			ctrl.supply_motor[0]->setspeed = 0;
-			ctrl.supply_motor[0]->spinning = false;
 		}
 	}
-	else 
-	{
-		ctrl.supply_motor[0]->spinning = false;
-		ctrl.supply_motor[1]->spinning = false;
-	}
+
+	
 }
 
 float CONTROL::CHASSIS::Ramp(float setval, float curval, uint32_t RampSlope)

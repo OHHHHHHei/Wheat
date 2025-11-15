@@ -119,18 +119,6 @@ void RC::OnRC()
 		{
 			ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
 			ctrl.shooter.openRub = true;//开摩擦轮
-
-			//开启供弹
-			if (abs(rc.ch[0]) > 330)
-			{
-				ctrl.shooter.supply_bullet = true;
-				ctrl.supply_motor[0]->setspeed = -2000;//供弹
-			}
-			else
-			{
-				ctrl.shooter.supply_bullet = false;
-				ctrl.supply_motor[0]->setspeed = 0;
-			}
 			break;
 		}
 
@@ -138,11 +126,12 @@ void RC::OnRC()
 		{
 			ctrl.Control_AutoAim();  // 调用自瞄控制函数
 			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f);   // 丢弃Y轴方向控制
+			break;
 		}
 
 		case CONTROL::SHENGSAI:
 		{
-			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, -rc.ch[0] * para.max_speed / 660.f, rc.ch[2] * para.max_speed / 660.f); //丢弃Z轴操控
+			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, -rc.ch[2] * para.max_speed / 660.f, rc.ch[0] * para.max_speed / 660.f); //丢弃Z轴操控
 			break;
 		}
 
