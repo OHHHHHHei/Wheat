@@ -58,7 +58,7 @@ void RC::OnRC()
 	{
 		ctrl.mode[now] = CONTROL::ROTATION;
 	}
-	else if (rc.s[0] == MID && rc.s[1] == UP)//自瞄模式    中上
+	else if (rc.s[0] == MID && rc.s[1] == UP)//自瞄模式    中上 
 	{
 		ctrl.mode[now] = CONTROL::AUTO;
 	}
