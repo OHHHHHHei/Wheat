@@ -27,6 +27,7 @@
 #include "HTmotor.h"
 #include "Power_read.h"
 #include "xuc.h"
+#include "power_limit.h"
    
 Motor can1_motor[CAN1_MOTOR_NUM] = {
 	Motor(M3508,SPD, chassis, ID1, PID(2.3f, 0.f, 6.49e-4f, 0.f)),
@@ -35,7 +36,7 @@ Motor can1_motor[CAN1_MOTOR_NUM] = {
 	Motor(M3508,SPD, chassis, ID3, PID(2.3f, 0.f, 6.49e-4f, 0.f)),    //can1[0]~can1[3]底盘电机
 
 	//陀螺仪控制云台
-	Motor(M6020,POS2, pantile, ID7, PID(2000.f, 1.f, 0.f, 0.f), PID(1.3f, 0.f, 0.6f, 0.25f)
+	Motor(M6020,POS_IMU, pantile, ID7, PID(2000.f, 1.f, 0.f, 0.f), PID(1.3f, 0.f, 0.6f, 0.25f)
 								, PID(0.f, 0.f, 0.f,0.f))//pid 0 speed     1 posititon
 
 	//Motor(M6020,POS2, pantile, ID7, PID(490.f, 0.f, 610.f, 0.f), PID(1.4f, 0.002f, 80.f, 0.25f)
@@ -94,7 +95,7 @@ int main(void)
 	timer.Init(BASE, TIM3, 1000).BaseInit();
 	imu_pantile.Init(&uart1, USART1, 115200, CH010);
 	rc.Init(&uart4, UART4, 100000);
-	power.Init(&uart5,UART5,9600);//10.7.23.00确认u4口正常，5.6.2口异常
+	power.Init(&uart5,UART5, 9600);//10.7.23.00确认u4口正常，5.6.2口异常
 	xuc.Init(&uart3, USART3, 460800);
 	para.Init();
 	ctrl.Init(std::vector<Motor*>{
@@ -114,6 +115,11 @@ int main(void)
 			& can1_motor[5]
 	});
 	DMmotor[0].DMmotorinit();
+
+	// 初始化功率控制器
+	// 参数: 底盘电机指针数组, 功率上限(W), k1, k2, k3
+	// 功率上限可根据实际情况调整
+	powerLimiter.Init(ctrl.chassis_motor, 40.0f, 1.931e-07 / 8.f, 1.381e-06 / 8.f, 4.54f / 8.f);
 
 	task.Init();
 	for (;;)

@@ -731,6 +731,9 @@
     <ClInclude Include="pid_feedforward.h">
       <Filter>Header files\Inc\user</Filter>
     </ClInclude>
+    <ClInclude Include="power_limit.h">
+      <Filter>Header files\Inc\user</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="system_stm32f4xx.c">
@@ -752,6 +755,9 @@
       <Filter>Source files\Src\device</Filter>
     </ClCompile>
     <ClCompile Include="pid_feedforward.cpp">
+      <Filter>Source files\Src\user</Filter>
+    </ClCompile>
+    <ClCompile Include="power_limit.cpp">
       <Filter>Source files\Src\user</Filter>
     </ClCompile>
   </ItemGroup>

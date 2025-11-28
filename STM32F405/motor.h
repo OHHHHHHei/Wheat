@@ -15,7 +15,7 @@ enum { ID1 = 0x205, ID2, ID3, ID4, ID5, ID6, ID7, ID8 };
 enum { pre = 0, now };
 enum pid_mode { speed = 0, position, speed2 , pos2};
 enum motor_type { M3508, M3510, M2310, EC60, M6623, M6020, M2006 };
-enum motor_mode { SPD, POS, ACE ,wheel_left,wheel_right, POS2};// POS2ÊÇÍÓÂÝÒÇ°æ±¾POS
+enum motor_mode { SPD, POS, ACE ,wheel_left,wheel_right, POS_IMU};
 enum function_type { chassis, pantile, shooter, supply };
 typedef enum { UNINIT, UNCONNECTED, DISCONNECTED, FINE }motor_status_t;
 #define SQRTF(x) ((x)>0?sqrtf(x):-sqrtf(-x))

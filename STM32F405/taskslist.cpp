@@ -11,6 +11,7 @@
 #include "HTmotor.h"
 #include "Power_read.h"
 #include "xuc.h"
+#include "power_limit.h"
 extern float Kp = 10;
 extern float Kd = 0.6;
 extern int start_flag;
@@ -84,6 +85,9 @@ void MotorUpdateTask(void* pvParameters)
 
 		for (auto& motor : can2_motor)motor.Ontimer(can2.data, can2.temp_data);
 
+		// 底盘功率限制
+		powerLimiter.ApplyToMotors(can1);
+
 		DMmotor[0].State_Decode(can2, can2.jointidata).DMmotor_Ontimer(can2, DMmotor[1].Kp, DMmotor[1].Kd, can2.jointpdata[0]);
 
 
@@ -101,7 +105,7 @@ void CanTransmitTask(void* pvParameters)
 		switch ((timer.counter++) % 3)
 		{
 		case 0:
-				DMmotor[0].DMmotor_transmit(1);  //发送达妙电机数据
+			DMmotor[0].DMmotor_transmit(1);  //发送达妙电机数据
 			break;
 		case 1:
 			can1.Transmit(0x1ff, can1.temp_data + 8); //发送can1的数据 云台
@@ -140,6 +144,9 @@ void DecodeTask(void* pvParameters)
 		rc.Decode();
 		imu_pantile.Decode();
 		xuc.Decode();
+		power.Receive();
+		power.Decode();
+		powerLimiter.UpdateMeasuredPower(power.power_now);
 		vTaskDelay(5);
 	}
 }

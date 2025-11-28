@@ -71,7 +71,7 @@ void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //云台控制
 		}
 
 		// 陀螺仪控制云台的小陀螺控制逻辑
-		if (pantile_motor[0]->mode == POS2)
+		if (pantile_motor[0]->mode == POS_IMU)
 		{
 			// YAW轴：根据摇杆输入更新IMU目标角度
 			pantile.markImuYaw = GetDelta(pantile.markImuYaw - ch_yaw * yaw_adjangle);
@@ -82,7 +82,7 @@ void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //云台控制
 	}
 	else {
 		//陀螺仪控制云台控制逻辑
-		if (pantile_motor[0]->mode == POS2)
+		if (pantile_motor[0]->mode == POS_IMU)
 		{
 			// YAW轴：根据摇杆输入更新IMU目标角度
 			pantile.markImuYaw = GetDelta(pantile.markImuYaw - ch_yaw * yaw_adjangle);
@@ -471,7 +471,7 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 	else
 	{
 		// 没有检测到目标，停止射击, 手动控制云台
-		shooter.openRub = false;
+		shooter.openRub = true;
 		shooter.supply_bullet = false;
 		shooter.auto_shoot = false;
 		supply_motor[0]->setspeed = 0;   // 供弹停止

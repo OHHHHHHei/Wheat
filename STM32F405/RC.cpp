@@ -56,8 +56,7 @@ void RC::OnRC()
 	}
 	else if (rc.s[0] == UP && rc.s[1] == UP)//小陀螺模式    上上
 	{
-		ctrl.mode[now] = CONTROL::SHENGSAI;
-		//ctrl.mode[now] = CONTROL::ROTATION;
+		ctrl.mode[now] = CONTROL::ROTATION;
 	}
 	else if (rc.s[0] == MID && rc.s[1] == UP)//自瞄模式    中上
 	{
@@ -82,7 +81,7 @@ void RC::OnRC()
 	}
 	else if (rc.s[0] == UP && rc.s[1] == DOWN)
 	{
-		;
+
 	}
 	if (Shift_mode())
 	{
@@ -96,50 +95,44 @@ void RC::OnRC()
 	{
 		switch (ctrl.mode[now])
 		{
-		case CONTROL::SEPARATE: // 分离模式
-		{
-			ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
-			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f);   // 分离模式我们丢弃Y轴方向控制
-			break;
-		}
+			case CONTROL::SEPARATE: // 分离模式
+			{
+				ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
+				ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f);   // 分离模式我们丢弃Y轴方向控制
+				break;
+			}
 
-		case CONTROL::ROTATION: // 小陀螺模式
-		{
-			// 给小陀螺模式的自旋速度做补偿，计算摇杆推出的距离大小，记录推杆力气不记录方向
-			float RCv_xy = sqrt(pow(rc.ch[1], 2.f) + pow(rc.ch[0], 2.f)) / 660.f;
-			ctrl.chassis.Keep_Direction(); // 控制正方向
-			ctrl.manual_chassis(rc.ch[1] * MAXSPEED / 660, -rc.ch[0] * MAXSPEED / 660, para.rota_speed + RCv_xy);// 平移会降低转速，于是提前主动增加一点转速来弥补这个损失
-			ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
-			//实战下小陀螺时候的自瞄与发弹
-			//ctrl.Control_AutoAim();  // 调用自瞄控制函数
-			break;
-		}
+			case CONTROL::ROTATION: // 小陀螺模式
+			{
+				// 给小陀螺模式的自旋速度做补偿，计算摇杆推出的距离大小，记录推杆力气不记录方向
+				float RCv_xy = sqrt(pow(rc.ch[1], 2.f) + pow(rc.ch[0], 2.f)) / 660.f;
+				ctrl.chassis.Keep_Direction(); // 控制正方向
+				ctrl.manual_chassis(rc.ch[1] * MAXSPEED / 660, -rc.ch[0] * MAXSPEED / 660, para.rota_speed + RCv_xy);// 平移会降低转速，于是提前主动增加一点转速来弥补这个损失
+				ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
+				//实战下小陀螺时候的自瞄与发弹
+				//ctrl.Control_AutoAim();  // 调用自瞄控制函数
+				break;
+			}
 
-		case CONTROL::SHOOT: // 单独开火模式
-		{
-			ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
-			ctrl.shooter.openRub = true;//开摩擦轮
-			break;
-		}
+			case CONTROL::SHOOT: // 单独开火模式
+			{
+				ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
+				ctrl.shooter.openRub = true;//开摩擦轮
+				break;
+			}
 
-		case CONTROL::AUTO:
-		{
-			ctrl.Control_AutoAim();  // 调用自瞄控制函数
-			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f);   // 丢弃Y轴方向控制
-			break;
-		}
+			case CONTROL::AUTO:
+			{
+				ctrl.Control_AutoAim();  // 调用自瞄控制函数
+				ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, 0, rc.ch[0] * para.max_speed / 660.f);   // 丢弃Y轴方向控制
+				break;
+			}
 
-		case CONTROL::SHENGSAI:
-		{
-			ctrl.manual_chassis(rc.ch[1] * para.max_speed / 660.f, -rc.ch[2] * para.max_speed / 660.f, rc.ch[0] * para.max_speed / 660.f); //丢弃Z轴操控
-			break;
-		}
-
-		default:
-		{
-			// 处理其他未指定的模式，或者什么都不做
-			break;
-		}
+			default:
+			{
+				// 处理其他未指定的模式，或者什么都不做
+				break;
+			}
 		}
 	}
 

@@ -162,7 +162,7 @@ void Motor::Ontimer(uint8_t idata[][8], uint8_t* odata)//idate: receive;odate: t
 			current = 0;
 		}
 	}
-	else if (mode == POS2)
+	else if (mode == POS_IMU)
 	{
 		static float lastSet;
 		float error;
