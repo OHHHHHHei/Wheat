@@ -76,11 +76,11 @@ void start_task(void* pvParameters)
 int CNT = 0;
 void MotorUpdateTask(void* pvParameters)
 {
-	
+
 	while (1)
 	{
-	TickType_t xlastWakeTime = xTaskGetTickCount();
-	
+		TickType_t xlastWakeTime = xTaskGetTickCount();
+
 		for (auto& motor : can1_motor)motor.Ontimer(can1.data, can1.temp_data);
 
 		for (auto& motor : can2_motor)motor.Ontimer(can2.data, can2.temp_data);
@@ -91,8 +91,8 @@ void MotorUpdateTask(void* pvParameters)
 		DMmotor[0].State_Decode(can2, can2.jointidata).DMmotor_Ontimer(can2, DMmotor[1].Kp, DMmotor[1].Kd, can2.jointpdata[0]);
 
 
-	vTaskDelayUntil(&xlastWakeTime, pdMS_TO_TICKS(2));//开始执行该任务之后1ms再执行该任务
-}
+		vTaskDelayUntil(&xlastWakeTime, pdMS_TO_TICKS(2));//开始执行该任务之后1ms再执行该任务
+	}
 }
 
 void CanTransmitTask(void* pvParameters)
@@ -117,7 +117,7 @@ void CanTransmitTask(void* pvParameters)
 		default:
 			break;
 		}
-		
+
 		vTaskDelayUntil(&xlastWakeTime1, pdMS_TO_TICKS(1));//开始执行该任务之后1ms再执行该任务
 
 	}
@@ -147,7 +147,7 @@ void DecodeTask(void* pvParameters)
 		power.Receive();
 		power.Decode();
 		powerLimiter.UpdateMeasuredPower(power.power_now);
-		vTaskDelay(5);
+		vTaskDelay(2);
 	}
 }
 
@@ -161,8 +161,3 @@ void ArmTask(void* pvParameters)
 		vTaskDelay(100);
 	}
 }
-
-
-
-
-

@@ -19,7 +19,7 @@ enum motor_mode { SPD, POS, ACE ,wheel_left,wheel_right, POS_IMU};
 enum function_type { chassis, pantile, shooter, supply };
 typedef enum { UNINIT, UNCONNECTED, DISCONNECTED, FINE }motor_status_t;
 #define SQRTF(x) ((x)>0?sqrtf(x):-sqrtf(-x))
-#define T 1.e-3f
+#define T 2.e-3f  // PID计算周期2ms，与MotorUpdateTask同步
 
 class Motor
 {

@@ -112,7 +112,7 @@ void CONTROL::PANTILE::Keep_Pantile(float angleKeep, PANTILE::TYPE type,IMU fram
 		if (delta <= -4096.f)//机械角归一化
 			delta += 8192.f;
 		else if (delta >= 4096.f)
-			delta -= 8291.f;
+			delta -= 8292.f;
 		if (abs(delta) >= 10.f) //死区设置，忽略小误差
 			mark_yaw += pantile_PID[PANTILE::YAW].Delta(delta); //增量式PID控制
 	}
@@ -301,7 +301,6 @@ void CONTROL::SHOOTER::Update()
 		else
 		{
 			ctrl.supply_motor[0]->spinning = false;
-			ctrl.supply_motor[1]->spinning = false;
 		}
 	}
 	else if (ctrl.mode[now] == SHOOT) //射击模式下供弹逻辑
