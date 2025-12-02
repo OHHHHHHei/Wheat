@@ -167,48 +167,35 @@ void Motor::Ontimer(uint8_t idata[][8], uint8_t* odata)//idate: receive;odate: t
 		static float lastSet;
 		float error;
 
-		if (ctrl.mode[now] != 5)
-		{
-			//IMU角度误差
-			error = ctrl.GetDelta(ctrl.pantile.markImuYaw  - imu_pantile.GetAngleYaw());
-		}
-		else {
-			//机械角误差
-			error = getdeltaa(para.initial_yaw - angle[now]);
-		}
-
-		if (std::fabs(error) < 0.02)//死区
-		{
-			setspeed = 0;
-		}
-		else {
-			if (ctrl.mode[now] == 5)
-			{
-				//机械角PID
-				setspeed = pid[position].Position(error, 500);
-			} else {
-				//IMU角度环PID
-				setspeed = pid[position].Position(error, 1500);
-			}
-		}
-
+		error = ctrl.GetDelta(ctrl.pantile.markImuYaw  - imu_pantile.GetAngleYaw());
+		//IMU角度环PID
+		setspeed = pid[position].Position(error, 1500);
+		//IMU角度误差
 		setspeed = setrange(setspeed, maxspeed);//最大速度限幅;
 		filtered_speed = imu_pantile.angularvelocity.yaw / 6.f;
-		//机械角速度环
-		if (ctrl.mode[now] == 5)
+
+		//IMU角度速度环
+		current = pid[speed].Position(setspeed - filtered_speed, 2000);
+
+		// 小陀螺模式前馈补偿：叠加根据底盘旋转角速度计算的前馈电流
+		// 只对云台电机(pantile)生效，用于抵消底盘旋转带来的干扰力矩
+		if (this->function == pantile)
 		{
-			setspeed = setrange(setspeed, maxspeed);
-			// current = pid[position].Position(setspeed - curspeed, 2000);
+			current += static_cast<int32_t>(ctrl.rotation_ff.ff_current);
 		}
-		else {
-			//IMU角度速度环
-			current = pid[speed].Position(setspeed - filtered_speed, 2000);
+
+		// 假设测得死区电流是 300，取 250 做补偿
+		friction_comp = 250.0f;
+
+		// 只要有速度请求（即便是 0.1），就加上这个基础力
+		if (setspeed > 0.0f) {
+			current += friction_comp;
 		}
-		//current = currentKalman.Filter(current);//卡尔曼滤波
+		else if (setspeed < 0.0f) {
+			current -= friction_comp;
+		}
+
 		current = setrange(current, maxcurrent);
-
-
-
 	}
 
 	recorded_the_Laps();

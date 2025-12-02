@@ -50,7 +50,12 @@ public:
 	uint16_t need_curcircle;
 	static int16_t getdeltaa(int16_t diff);
 	uint8_t getStatus()const;
-	int32_t current{}, curspeed{}, setcurrent{}, setspeed{}, filtered_speed{}, torque_current, motor_status, motor_angle_status, sum_angle{};//这个current用于输出电流或者电压
+	// 修改后：将速度和控制相关的变量改为 float
+	int32_t current{}, torque_current, motor_status, motor_angle_status, sum_angle{}; // current(输出值)保持int通常没问题，因为最终发给电调的是int
+	int32_t setcurrent{};
+	// 重点修改这里：
+	float curspeed{}, setspeed{}, filtered_speed{};
+	float friction_comp;
 	int16_t adjspeed{};
 	int16_t maxspeed{}, maxcurrent{};
 	Kalman currentKalman{ 1.f, 40.f };

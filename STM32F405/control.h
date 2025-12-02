@@ -74,10 +74,20 @@ public:
 		float pitch_acc_ff = 0.1f;    // pitch加速度前馈系数
 	} autoaim_ff;
 	
+	// 小陀螺模式云台Yaw轴前馈补偿参数
+	// 原理：根据底盘旋转角速度计算前馈电流，主动抵消底盘带动云台的干扰力矩
+	struct ROTATION_FEEDFORWARD
+	{
+		float ff_gain = 800.0f;        // 前馈增益系数（需实际调试）
+		float chassis_omega = 0.0f;    // 底盘当前旋转角速度 (rad/s)，由轮子转速反解
+		float ff_current = 0.0f;       // 前馈电流输出值
+	} rotation_ff;
+
 	static int16_t Setrange(const int16_t original, const int16_t range);
 	void manual_chassis(int32_t speedx, int32_t speedy, int32_t speedz);
 	void Control_Pantile(float_t ch_yaw, float_t ch_pitch);
 	void Control_AutoAim();  // 自瞄控制函数
+	void CalcRotationFeedforward();  // 计算小陀螺前馈补偿
 	float GetDelta(float delta);
 	void Init(std::vector<Motor*> motor);
 	void init_dm();

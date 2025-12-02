@@ -478,4 +478,49 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 	}
 }
 
+/**
+ * @brief 计算小陀螺模式下云台Yaw轴的前馈补偿电流
+ *
+ * 原理：通过4个麦轮的实时转速反解底盘旋转角速度，
+ *       将角速度转换为前馈电流叠加到云台电机输出，
+ *       主动抵消底盘旋转带来的机械摩擦和反电动势干扰。
+ *
+ * 麦轮逆运动学推导（基于CHASSIS::Update中的正运动学）：
+ *   轮子[0]: +speedy + speedx - speedz
+ *   轮子[1]: -speedy + speedx - speedz
+ *   轮子[2]: -speedy - speedx - speedz
+ *   轮子[3]: +speedy - speedx - speedz
+ *   => speedz = -(v0 + v1 + v2 + v3) / 4
+ */
+void CONTROL::CalcRotationFeedforward()
+{
+	// 麦轮RPM转底盘角速度的转换常数
+	// K = 2π × 0.07625 / (60 × 19 × 0.376) ≈ 0.001117 rad/s per RPM
+	constexpr float K_RPM_TO_OMEGA = 0.001117f;
+
+	// 获取4个底盘轮子的当前转速 (RPM，来自电机反馈)
+	float v0 = static_cast<float>(chassis_motor[0]->curspeed);
+	float v1 = static_cast<float>(chassis_motor[1]->curspeed);
+	float v2 = static_cast<float>(chassis_motor[2]->curspeed);
+	float v3 = static_cast<float>(chassis_motor[3]->curspeed);
+
+	// 反解底盘旋转角速度 omega_z (rad/s)
+	// 根据运动学：所有轮子都贡献 -speedz，故 speedz = -(v0+v1+v2+v3)/4
+	float avg_rpm = (v0 + v1 + v2 + v3) / 4.0f;
+	rotation_ff.chassis_omega = -avg_rpm * K_RPM_TO_OMEGA;
+
+	// 只在小陀螺模式下生成前馈电流
+	if (mode[now] == ROTATION)
+	{
+		// 前馈电流 = 增益 × 底盘角速度
+		// 方向说明：底盘顺时针转(omega>0)时，云台需要逆时针力矩(current<0)来抵消
+		rotation_ff.ff_current = -rotation_ff.ff_gain * rotation_ff.chassis_omega;
+	}
+	else
+	{
+		// 非小陀螺模式，前馈置零
+		rotation_ff.ff_current = 0.0f;
+	}
+}
+
 extern uint8_t Power_stsRx[];

@@ -129,6 +129,7 @@ void ControlTask(void* pvParameters)
 	{
 		xuc.Encode();
 		ctrl.chassis.Update();
+		ctrl.CalcRotationFeedforward();
 		ctrl.pantile.Update();
 		ctrl.shooter.Update();
 		rc.Update();
