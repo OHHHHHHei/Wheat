@@ -83,14 +83,12 @@ public:
 		float ff_current = 0.0f;       // 前馈电流输出值
 	} rotation_ff;
 
-	static int16_t Setrange(const int16_t original, const int16_t range);
 	void manual_chassis(int32_t speedx, int32_t speedy, int32_t speedz);
 	void Control_Pantile(float_t ch_yaw, float_t ch_pitch);
 	void Control_AutoAim();  // 自瞄控制函数
 	void CalcRotationFeedforward();  // 计算小陀螺前馈补偿
 	float GetDelta(float delta);
 	void Init(std::vector<Motor*> motor);
-	void init_dm();
 private:
 
 };

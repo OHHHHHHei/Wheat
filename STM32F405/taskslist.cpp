@@ -137,7 +137,6 @@ void ControlTask(void* pvParameters)
 	}
 }
 
-
 void DecodeTask(void* pvParameters)
 {
 	while (true)

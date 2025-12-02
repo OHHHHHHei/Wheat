@@ -386,12 +386,6 @@ float CONTROL::GetDelta(float delta)
 	return delta;
 }
 
-//限幅函数
-int16_t CONTROL::Setrange(const int16_t original, const int16_t range)
-{
-	return fmaxf(fminf(range, original), -range);
-}
-
 void CONTROL::Control_AutoAim()//自瞄控制函数
 {
 	// 检查视觉系统是否有目标数据

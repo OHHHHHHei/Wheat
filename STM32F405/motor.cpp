@@ -183,8 +183,7 @@ void Motor::Ontimer(uint8_t idata[][8], uint8_t* odata)//idate: receive;odate: t
 		{
 			current += static_cast<float>(ctrl.rotation_ff.ff_current);
 		}
-
-		// 假设测得死区电流是 300，取 250 做补偿
+		// 摩擦力补偿
 		friction_comp = 200.0f;
 
 		// 只要有速度请求（即便是 0.1），就加上这个基础力
