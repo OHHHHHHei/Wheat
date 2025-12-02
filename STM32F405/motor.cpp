@@ -181,11 +181,11 @@ void Motor::Ontimer(uint8_t idata[][8], uint8_t* odata)//idate: receive;odate: t
 		// 只对云台电机(pantile)生效，用于抵消底盘旋转带来的干扰力矩
 		if (this->function == pantile)
 		{
-			current += static_cast<int32_t>(ctrl.rotation_ff.ff_current);
+			current += static_cast<float>(ctrl.rotation_ff.ff_current);
 		}
 
 		// 假设测得死区电流是 300，取 250 做补偿
-		friction_comp = 250.0f;
+		friction_comp = 200.0f;
 
 		// 只要有速度请求（即便是 0.1），就加上这个基础力
 		if (setspeed > 0.0f) {
@@ -285,7 +285,7 @@ int16_t Motor::getword(const uint8_t high, const uint8_t low)
 	return (word << 8) + low;
 }
 
-int32_t Motor::setrange(const int32_t original, const int32_t range)
+float Motor::setrange(const float original, const float range)
 {
 	return std::max(std::min(range, original), -range);
 }

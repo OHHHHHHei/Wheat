@@ -43,7 +43,7 @@ private:
 	void StatusIdentifier(int32_t torque_current);
 	void GetDistanceFromMechanicalAngle();
 	static int16_t getword(const uint8_t high, const uint8_t low);
-	static int32_t setrange(const int32_t original, const int32_t range);
+	static float setrange(const float original, const float range);
 	type_t type;
 public:
 	function_type function;

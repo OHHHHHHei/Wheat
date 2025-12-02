@@ -78,7 +78,7 @@ public:
 	// 原理：根据底盘旋转角速度计算前馈电流，主动抵消底盘带动云台的干扰力矩
 	struct ROTATION_FEEDFORWARD
 	{
-		float ff_gain = 800.0f;        // 前馈增益系数（需实际调试）
+		float ff_gain = 900.0f;        // 前馈增益系数（需实际调试）
 		float chassis_omega = 0.0f;    // 底盘当前旋转角速度 (rad/s)，由轮子转速反解
 		float ff_current = 0.0f;       // 前馈电流输出值
 	} rotation_ff;
