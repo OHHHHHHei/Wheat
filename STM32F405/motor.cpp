@@ -193,7 +193,7 @@ void Motor::Ontimer(uint8_t idata[][8], uint8_t* odata)//idate: receive;odate: t
 		else if (setspeed < 0.0f) {
 			current -= friction_comp;
 		}
-
+		// 最大电流限幅
 		current = setrange(current, maxcurrent);
 	}
 
