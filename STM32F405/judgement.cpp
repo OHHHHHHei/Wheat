@@ -4,7 +4,7 @@
 #include <cstdarg>
 #include "imu.h"
 #include "control.h"
-#include "nuc.h"
+#include "xuc.h"
 #include "RC.h"
 #include "supercap.h"
 

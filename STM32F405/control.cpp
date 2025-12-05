@@ -289,7 +289,7 @@ void CONTROL::SHOOTER::Update()
 		{
 			if (auto_shoot && manual_shoot)//如果火控和操作手同时同意开火，则开火(双重火控)
 			{
-				ctrl.supply_motor[0]->setspeed = -700;
+				ctrl.supply_motor[0]->setspeed = -2000;
 				ctrl.supply_motor[0]->spinning = true;//spining一秒八发
 			}
 			else

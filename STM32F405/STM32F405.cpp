@@ -119,7 +119,7 @@ int main(void)
 	// 初始化功率控制器
 	// 参数: 底盘电机指针数组, 功率上限(W), k1, k2, k3
 	// 功率上限可根据实际情况调整
-	powerLimiter.Init(ctrl.chassis_motor, 40.0f, 0.17f, 1.08f, 5.3f);
+	powerLimiter.Init(ctrl.chassis_motor, 80.0f, 0.17f, 1.08f, 5.3f);
 
 	task.Init();
 	for (;;)
