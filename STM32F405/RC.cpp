@@ -110,8 +110,7 @@ void RC::OnRC()
 				ctrl.Control_Pantile(rc.ch[2] * para.yaw_speed / 660.f, -rc.ch[3] * para.pitch_speed / 660.f); // 云台控制
 				ctrl.chassis.Keep_Direction(); // 控制正方向
 				//实战下小陀螺时候的自瞄与发弹
-				//ctrl.Control_AutoAim();  // 调用自瞄控制函数
-		
+				ctrl.Control_AutoAim();  // 调用自瞄控制函数
 				break;
 			}
 
