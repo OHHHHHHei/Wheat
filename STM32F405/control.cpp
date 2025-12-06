@@ -279,11 +279,11 @@ void CONTROL::SHOOTER::Update()
 	}
 	else//停止摩擦轮
 	{
-		ctrl.shooter_motor[0]->setspeed = 0;
+		ctrl.shooter_motor[0]->setspeed = 0; 
 		ctrl.shooter_motor[1]->setspeed = 0;
 	}
 	//自瞄供弹逻辑
-	if (ctrl.mode[now] == AUTO)
+	if (ctrl.mode[now] == AUTO || ctrl.mode[now] == ROTATION)
 	{
 		if (supply_bullet && openRub)//如果开火和供弹
 		{
