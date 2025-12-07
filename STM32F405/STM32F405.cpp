@@ -57,9 +57,9 @@ Motor can1_motor[CAN1_MOTOR_NUM] = {
 Motor can2_motor[CAN2_MOTOR_NUM] = {
 	Motor(M3508, SPD, shooter, ID1, PID(7.5f, 0.f, 0.02f,0.f)),
 	Motor(M3508, SPD, shooter, ID2, PID(7.5f, 0.f, 0.02f,0.f)),
-	//Motor(M2006, SPD, supply, ID7, PID(3.5f, 0.1f, 5.f, 0.f)),	//spd王起態
+	//Motor(M2006, SPD, supply, ID7, PID(3.5f, 0.1f, 5.f, 0.f)),	//SPD 王起態
 
-	Motor(M2006, ACE, supply, ID7, PID(3.0f, 0.01f, 10.f),PID(0.5f, 0.01f, 2.f,0.f)),	//ace王起態
+	Motor(M2006, ACE, supply, ID7, PID(3.0f, 0.01f, 10.f),PID(0.5f, 0.01f, 2.f,0.f)), // ACE 王起態
 
 	//Motor(M6020, POS, pantile ,ID6, PID(140.f, 0.1f, 60.f,0.f),PID(0.3f, 0.f, 2.f,0.f))
 };

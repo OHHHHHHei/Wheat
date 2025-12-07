@@ -88,10 +88,13 @@ void MotorUpdateTask(void* pvParameters)
 		// 底盘功率限制
 		powerLimiter.ApplyToMotors(can1);
 
+		// 计算完直接发送，确保数据一致性
+		can1.Transmit(0x200, can1.temp_data); 
+
 		DMmotor[0].State_Decode(can2, can2.jointidata).DMmotor_Ontimer(can2, DMmotor[1].Kp, DMmotor[1].Kd, can2.jointpdata[0]);
 
-
-		vTaskDelayUntil(&xlastWakeTime, pdMS_TO_TICKS(2));//开始执行该任务之后1ms再执行该任务
+		//开始执行该任务之后1ms再执行该任务
+		vTaskDelayUntil(&xlastWakeTime, pdMS_TO_TICKS(2));
 	}
 }
 

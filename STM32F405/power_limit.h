@@ -113,7 +113,6 @@ private:
     static float Av2Rpm(float av) { return av * 30.0f / 3.14159265f; }
 
     // 电机轴RPM转输出轴角速度 (考虑减速比)
-    // motor.curspeed 是电机轴转速，需要除以减速比得到输出轴转速
     static float MotorRpmToOutputAv(float motorRpm) {
         return (motorRpm / M3508_REDUCTION_RATIO) * 3.14159265f / 30.0f;
     }

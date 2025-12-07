@@ -41,8 +41,8 @@ void CONTROL::Init(std::vector<Motor*> motor) //初始化
 	DMmotor[0].setPos = para.initial_pitch;//达妙pitch初始化
 }
 
-
-void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //云台控制
+//云台控制函数
+void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch) 
 {
 	ch_pitch *= (-1.f);
 	ch_yaw *= (1.f);//方向相反修改这里正负
@@ -65,7 +65,9 @@ void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //云台控制
 		{
 			// YAW轴：根据摇杆输入更新IMU目标角度，使用绝对角度控制（抵消底盘旋转）
 			pantile.markImuYaw -= ch_yaw;
+
 			pantile.Keep_Pantile(pantile.markImuYaw, CONTROL::PANTILE::TYPE::YAW, imu_pantile);
+
 			// PITCH轴：不受底盘旋转影响，直接使用机械角度控制
 			ctrl.pantile.mark_pitch -= (float)(pitch_adjangle * ch_pitch);
 		}
@@ -75,11 +77,13 @@ void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //云台控制
 		{
 			// YAW轴：根据摇杆输入更新IMU目标角度
 			pantile.markImuYaw = GetDelta(pantile.markImuYaw - ch_yaw * yaw_adjangle);
+
 			// PITCH控制
 			ctrl.pantile.mark_pitch -= (float)(pitch_adjangle * ch_pitch);
 		}
 
 	}
+	//非小陀螺的云台控制
 	else {
 		//陀螺仪控制云台控制逻辑
 		if (pantile_motor[0]->mode == POS_IMU)
@@ -94,15 +98,12 @@ void CONTROL::Control_Pantile(float_t ch_yaw, float_t ch_pitch)  //云台控制
 
 		//PITCH控制
 		pantile.mark_pitch -= (float)(pitch_adjangle * ch_pitch);
-
-		//ctrl.pantile.mark_pitch -= (float)(pitch_adjangle * ch_pitch);//改变pitch目标值
-		//ctrl.pantile.mark_yaw -= (float)(yaw_adjangle * ch_yaw);//改变yaw目标值
 	}
 	//更新模式数据
 	mode[pre] = mode[now];
 }
 
-//保持云台固定在绝对位置，机械角小陀螺时使用
+//保持云台固定在绝对位置，小陀螺时使用
 void CONTROL::PANTILE::Keep_Pantile(float angleKeep, PANTILE::TYPE type,IMU frameOfReference)
 {
 	float delta = 0, adjust = sensitivity;
@@ -112,7 +113,7 @@ void CONTROL::PANTILE::Keep_Pantile(float angleKeep, PANTILE::TYPE type,IMU fram
 		if (delta <= -4096.f)//机械角归一化
 			delta += 8192.f;
 		else if (delta >= 4096.f)
-			delta -= 8292.f;
+			delta -= 8192.f;
 		if (abs(delta) >= 10.f) //死区设置，忽略小误差
 			mark_yaw += pantile_PID[PANTILE::YAW].Delta(delta); //增量式PID控制
 	}
@@ -139,12 +140,15 @@ void CONTROL::PANTILE::Keep_Pantile(float angleKeep, PANTILE::TYPE type,IMU fram
 // 使得底盘运动方向按照云台正方向修正，小陀螺时使用
 void CONTROL::CHASSIS::Keep_Direction()
 {
-	double s_x = speedx, s_y = speedy;//记录原始的摇杆输入速度
+	//记录原始的摇杆输入速度
+	double s_x = speedx, s_y = speedy;
 
-	double theat = (-1.f) * ctrl.GetDelta(mechanicalToDegree(ctrl.pantile_motor[PANTILE::TYPE::YAW]->angle[now])// 计算云台相对于底盘的旋转角度theta
+	// 计算云台相对于底盘的旋转角度theta
+	double theat = (-1.f) * ctrl.GetDelta(mechanicalToDegree(ctrl.pantile_motor[PANTILE::TYPE::YAW]->angle[now])
 					- mechanicalToDegree(para.initial_yaw)) * PI / 180.f;//initial_yaw是初始化时确定的，就是底盘正前方对应的云台的yaw值，转化为弧度制
 
-	double st = sin(theat);//计算角度的正弦和余弦值
+	//计算角度的正弦和余弦值
+	double st = sin(theat);
 	double ct = cos(theat);
 
 	//应用二维旋转矩阵公式，speedx 和 speedy 更新为“车体坐标系”下的正确速度
@@ -161,6 +165,7 @@ void CONTROL::manual_chassis(int32_t _speedx, int32_t _speedy, int32_t _speedz)/
 	float setX, setY, setZ;
 	//计算总速度
 	float _total_speed = sqrt(_speedx * _speedx + _speedy * _speedy + _speedz * _speedz);
+
 	//检查是否超速，9000为最大速度
 	if (_total_speed > 9000)
 	{
@@ -175,6 +180,7 @@ void CONTROL::manual_chassis(int32_t _speedx, int32_t _speedy, int32_t _speedz)/
 		setY = _speedy;
 		setZ = _speedz;
 	}
+
 	//将处理后的值赋给对应speed
 	total_speed = sqrt(setX * setX + setY * setY + setZ * setZ);
 	this->chassis.speedx = setX;
@@ -192,7 +198,7 @@ void CONTROL::CHASSIS::Update()
 		speedz = 0;
 	}
 
-	//运动学解算
+	//底盘电机的运动学解算
 	ctrl.chassis_motor[0]->setspeed = Ramp_plus(+speedy + speedx - speedz, ctrl.chassis_motor[0]->setspeed, 25, 80);
 	ctrl.chassis_motor[1]->setspeed = Ramp_plus(-speedy + speedx - speedz, ctrl.chassis_motor[1]->setspeed, 25, 80);
 	ctrl.chassis_motor[2]->setspeed = Ramp_plus(-speedy - speedx - speedz, ctrl.chassis_motor[2]->setspeed, 25, 80);
@@ -283,18 +289,18 @@ void CONTROL::SHOOTER::Update()
 		ctrl.shooter_motor[1]->setspeed = 0;
 	}
 	//自瞄供弹逻辑
-	if (ctrl.mode[now] == AUTO || ctrl.mode[now] == ROTATION)
+	if (ctrl.mode[now] == AUTO || ctrl.mode[now] == ROTATION || ctrl.mode[now] == ROTATION_SHOOT)
 	{
-		if (supply_bullet && openRub)//如果开火和供弹
+		if (supply_bullet && openRub)//如果摩擦轮启动，并且启动供弹标志位
 		{
 			if (auto_shoot && manual_shoot)//如果火控和操作手同时同意开火，则开火(双重火控)
 			{
-				ctrl.supply_motor[0]->setspeed = -2000;
+				ctrl.supply_motor[0]->setspeed = -3000;
 				ctrl.supply_motor[0]->spinning = true;//spining一秒八发
 			}
 			else
 			{
-				ctrl.supply_motor[0]->setspeed = -1500;
+				ctrl.supply_motor[0]->setspeed = 0;
 				ctrl.supply_motor[0]->spinning = false;
 			}
 		}
@@ -303,7 +309,7 @@ void CONTROL::SHOOTER::Update()
 			ctrl.supply_motor[0]->spinning = false;
 		}
 	}
-	else if (ctrl.mode[now] == SHOOT) //射击模式下供弹逻辑
+	else if (ctrl.mode[now] == SHOOT) //单独射击模式下供弹逻辑
 	{
 		if (abs(rc.rc.ch[0]) > 330)
 		{
@@ -386,10 +392,11 @@ float CONTROL::GetDelta(float delta)
 	return delta;
 }
 
-void CONTROL::Control_AutoAim()//自瞄控制函数
+//自瞄控制函数
+void CONTROL::Control_AutoAim()
 {
 	// 检查视觉系统是否有目标数据
-	if (xuc.RxNuc_TJ.mode_TJ != 0)  //表示是否检测到目标
+	if (xuc.RxNuc_TJ.mode_TJ != 0)
 	{
 		// 读取视觉系统提供的目标信息（弧度制）
 		float target_yaw = xuc.RxNuc_TJ.yaw_TJ;         // 目标yaw角度（弧度）
@@ -404,6 +411,7 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 
 		//pitch用弧度制来控制
 		cmd_pitch = target_pitch;
+
 		// 计算yaw轴前馈补偿
 		float yaw_vel_feedforward = autoaim_ff.yaw_vel_ff * target_yaw_vel;
 		float yaw_acc_feedforward = autoaim_ff.yaw_acc_ff * target_yaw_acc;
@@ -412,12 +420,13 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 		float pitch_vel_feedforward = autoaim_ff.pitch_vel_ff * target_pitch_vel;
 		float pitch_acc_feedforward = autoaim_ff.pitch_acc_ff * target_pitch_acc;
 
-		// 更新云台目标角度（目标角度 + 速度前馈 + 加速度前馈）
+		// 更新云台目标角度 (目标角度 + 速度前馈)
 		pantile.markImuYaw = cmd_yaw + yaw_vel_feedforward;
 		//yaw_acc_feedforward;
 		
 		pantile.mark_pitch = cmd_pitch + pitch_vel_feedforward;
 			//+ pitch_acc_feedforward;
+
 
 		// 火控逻辑
 		// mode_TJ: 0=不控制, 1=控制云台但不开火, 2=控制云台且开火
@@ -438,6 +447,7 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 			}
 
 		}
+		//现在的1模式下我们依旧开火，因为目前上位机火控还没有调试很完善
 		else if (xuc.RxNuc_TJ.mode_TJ == 1)
 		{
 			//// 只控制云台，不拨弹但保持摩擦轮运转（快速响应）
@@ -445,8 +455,8 @@ void CONTROL::Control_AutoAim()//自瞄控制函数
 			//shooter.supply_bullet = false; // 停止供弹
 			//shooter.auto_shoot = false;    // 关闭自动射击
 			//supply_motor[0]->setspeed = 0;   // 供弹停止
-
-			// 视觉系统请求开火
+			
+			
 			shooter.openRub = true;        // 启动摩擦轮
 			shooter.supply_bullet = true;  // 启动供弹
 			shooter.auto_shoot = true;     // 火控同意射击

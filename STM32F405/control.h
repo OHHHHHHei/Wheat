@@ -14,7 +14,7 @@ public:
 	Motor* shooter_motor[SHOOTER_MOTOR_NUM]{};
 	Motor* supply_motor[SUPPLY_MOTOR_NUM]{};
 	
-	enum MODE { RESET, ROTATION, SEPARATE, FOLLOW, LOCK, TEST, AUTO, SHOOT, BLANK, SHENGSAI};
+	enum MODE { RESET, ROTATION, SEPARATE, FOLLOW, LOCK, TEST, AUTO, SHOOT, BLANK, SHENGSAI, ROTATION_SHOOT};
 	MODE mode[2];
 	float total_speed;
 
